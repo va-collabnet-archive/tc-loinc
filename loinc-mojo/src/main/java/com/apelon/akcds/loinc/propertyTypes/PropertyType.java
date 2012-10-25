@@ -1,10 +1,9 @@
 package com.apelon.akcds.loinc.propertyTypes;
 
+import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import com.apelon.akcds.loinc.counter.UUIDInfo;
 
 /**
  * Abstract base class to help in mapping DTS property types into the workbench data model.
@@ -28,7 +27,7 @@ public abstract class PropertyType
 		srcVersion_ = version;
 	}
 	
-	protected PropertyType( String propertyTypeDescription, String uuidRoot)
+	protected PropertyType(String propertyTypeDescription, String uuidRoot)
 	{
 		this.propertyNames_ = new HashSet<String>();
 		this.propertyTypeDescription_ = propertyTypeDescription;
@@ -37,16 +36,12 @@ public abstract class PropertyType
 	
 	public UUID getPropertyUUID(String propertyName)
 	{
-		UUID uuid = UUID.nameUUIDFromBytes((uuidRoot_ + ":" + propertyTypeDescription_ + ":" + propertyName).getBytes());
-		UUIDInfo.add(uuid, uuidRoot_ + ":" + propertyTypeDescription_ + ":" + propertyName);
-		return uuid;
+		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_ + ":" + propertyName).getBytes());
 	}
 	
 	public UUID getPropertyTypeUUID()
 	{
-		UUID uuid = UUID.nameUUIDFromBytes((uuidRoot_ + ":" + propertyTypeDescription_).getBytes());
-		UUIDInfo.add(uuid, uuidRoot_ + ":" + propertyTypeDescription_);
-		return uuid;
+		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + propertyTypeDescription_).getBytes());
 	}
 	
 	public String getPropertyTypeDescription()
@@ -78,7 +73,7 @@ public abstract class PropertyType
 		propertyNames_.add(propertyName);
 	}
 	
-	protected void addPropertyName(String propertyName)
+	public void addPropertyName(String propertyName)
 	{
 		propertyNames_.add(propertyName);
 	}

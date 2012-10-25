@@ -10,7 +10,7 @@ public class PT_SkipClass extends PT_Skip
 {
 	public PT_SkipClass(String uuidRoot)
 	{
-		super("Loinc Class", uuidRoot);
+		super("LOINC Class", uuidRoot);
 		
 		//special handling
 		addPropertyName("CLASS");

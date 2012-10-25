@@ -1,5 +1,8 @@
 package com.apelon.akcds.loinc;
 
+import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
+import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility;
+import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -15,15 +18,12 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.dwfa.cement.ArchitectonicAuxiliary;
 import org.dwfa.tapi.TerminologyException;
 import org.ihtsdo.etypes.EConcept;
 import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
-
-import com.apelon.akcds.loinc.counter.UUIDInfo;
 import com.apelon.akcds.loinc.propertyTypes.PT_Attributes;
 import com.apelon.akcds.loinc.propertyTypes.PT_ContentVersion;
 import com.apelon.akcds.loinc.propertyTypes.PT_Descriptions;
@@ -70,7 +70,7 @@ public class LoincToEConcepts extends AbstractMojo
 
 	private int conCounter_ = 0;
 
-	private final String uuidRoot_ = "com.apelon.akcds.loinc";
+	private final String uuidRoot_ = "com.apelon.akcds.loinc:";
 
 	//Want a specific handle to these two - adhoc usage.
 	private final PropertyType contentVersion_ = new PT_ContentVersion(uuidRoot_);
@@ -105,7 +105,6 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		ConsoleUtil.disableFancy = true;
 		LoincToEConcepts loincConverter = new LoincToEConcepts();
 		loincConverter.outputDirectory = new File("../loinc-data/target/");
 		loincConverter.loincDataFiles = new File("../loinc-data/target/generated-resources/src");
@@ -118,16 +117,27 @@ public class LoincToEConcepts extends AbstractMojo
 		propertyTypes_.add(new PT_IDs(uuidRoot_));
 		propertyTypes_.add(new PT_Attributes(uuidRoot_));
 		propertyTypes_.add(new PT_Descriptions(uuidRoot_));
-		propertyTypes_.add(new PT_Relations(uuidRoot_));
-		propertyTypes_.add(new PT_SkipOther(uuidRoot_));
 		propertyTypes_.add(pt_SkipAxis_);
 		propertyTypes_.add(pt_SkipClass_);
+		PT_Relations r = new PT_Relations(uuidRoot_);
+		//Create relations out of the skipAxis and SkipClass
+		for (String  s : pt_SkipAxis_.getPropertyNames())
+		{
+			r.addPropertyName("Has_" + s);
+		}
+		for (String  s : pt_SkipClass_.getPropertyNames())
+		{
+			r.addPropertyName("Has_" + s);
+		}
+		propertyTypes_.add(r);
+		propertyTypes_.add(new PT_SkipOther(uuidRoot_));
+
 		propertyTypes_.add(contentVersion_);
 	}
 
 	public void execute() throws MojoExecutionException
 	{
-		ConsoleUtil.println("Loinc Processing Begins " + new Date().toString());
+		ConsoleUtil.println("LOINC Processing Begins " + new Date().toString());
 		BufferedReader dataReader = null;
 		BufferedReader multiDataReader = null;
 		try
@@ -140,7 +150,7 @@ public class LoincToEConcepts extends AbstractMojo
 			
 			if (!loincDataFiles.isDirectory())
 			{
-				throw new MojoExecutionException("loincDataFiles must point to a directory containing the 3 required loinc data files");
+				throw new MojoExecutionException("LoincDataFiles must point to a directory containing the 3 required loinc data files");
 			}
 			
 			
@@ -227,8 +237,8 @@ public class LoincToEConcepts extends AbstractMojo
 			
 			//Set up a meta-data root concept
 			UUID archRoot = ArchitectonicAuxiliary.Concept.ARCHITECTONIC_ROOT_CONCEPT.getPrimoridalUid();
-			UUID metaDataRoot = UUID.nameUUIDFromBytes((uuidRoot_ + ":metadata").getBytes());
-			EConcept metaDataRootConcept = createAuxEConcept(metaDataRoot, "Loinc Metadata", archRoot);
+			UUID metaDataRoot = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "metadata").getBytes());
+			EConcept metaDataRootConcept = createAuxEConcept(metaDataRoot, "LOINC Metadata", archRoot);
 			concepts_.put(metaDataRoot, metaDataRootConcept);
 			
 			//And for all of the other property types
@@ -279,8 +289,7 @@ public class LoincToEConcepts extends AbstractMojo
 			checkForLeftoverPropertyTypes(headerFields);
 			
 			//Root
-			EConcept rootConcept = conceptUtility_.createConcept(UUID.nameUUIDFromBytes((uuidRoot_ + ":LOINC").getBytes()),
-					"LOINC", System.currentTimeMillis());
+			EConcept rootConcept = conceptUtility_.createConcept("LOINC", "LOINC");
 			
 			conceptUtility_.addDescription(rootConcept, version, contentVersion_.getPropertyUUID("version"), false);
 			conceptUtility_.addDescription(rootConcept, releaseDate, contentVersion_.getPropertyUUID("releaseDate"), false);
@@ -378,11 +387,11 @@ public class LoincToEConcepts extends AbstractMojo
 				ConsoleUtil.println("  " + s);
 			}
 			
-			//this should be removed from final release.  Just added to help debug editor problems.
+			//this could be removed from final release.  Just added to help debug editor problems.
 			ConsoleUtil.println("Dumping UUID Debug File");
-			UUIDInfo.dump(new File(outputDirectory, "loincUuidDebugMap.txt"));
+			ConverterUUID.dump(new File(outputDirectory, "loincUuidDebugMap.txt"));
 			
-			ConsoleUtil.println("Loinc Processing Completes " + new Date().toString());
+			ConsoleUtil.println("LOINC Processing Completes " + new Date().toString());
 		}
 		catch (Exception ex)
 		{
@@ -462,7 +471,7 @@ public class LoincToEConcepts extends AbstractMojo
 				}
 				if (pt instanceof PT_Attributes)
 				{
-					conceptUtility_.addAnnotation(concept, fields[fieldIndex], pt.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), 
+					conceptUtility_.addStringAnnotation(concept, fields[fieldIndex], pt.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), 
 							pt.isDisabled(fieldMapInverse_.get(fieldIndex)));
 				}
 				else if (pt instanceof PT_Descriptions)
@@ -478,7 +487,7 @@ public class LoincToEConcepts extends AbstractMojo
 				else if (pt instanceof PT_SkipAxis)
 				{
 					//See if this class object exists yet.
-					UUID potential = UUID.nameUUIDFromBytes((uuidRoot_ + ":" + 
+					UUID potential = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + 
 							pt_SkipAxis_.getPropertyTypeDescription() + ":" +
 							fieldMapInverse_.get(fieldIndex) + ":" + 
 							fields[fieldIndex]).getBytes());
@@ -486,16 +495,20 @@ public class LoincToEConcepts extends AbstractMojo
 					EConcept axisConcept = concepts_.get(potential);
 					if (axisConcept == null)
 					{
-						axisConcept = conceptUtility_.createConcept(potential, fields[fieldIndex], System.currentTimeMillis());
-						conceptUtility_.addRelationship(axisConcept, pt_SkipAxis_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), null);
+						axisConcept = conceptUtility_.createConcept(potential, fields[fieldIndex], null);
+						conceptUtility_.addRelationship(axisConcept, pt_SkipAxis_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), null, null);
 						concepts_.put(axisConcept.primordialUuid, axisConcept);
 					}
-					conceptUtility_.addAnnotation(concept, axisConcept, pt_SkipAxis_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)));
+					//We changed these from attributes to relations
+					//conceptUtility_.addAnnotation(concept, axisConcept, pt_SkipAxis_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)));
+					String relTypeName = "Has_" + fieldMapInverse_.get(fieldIndex);
+					PropertyType relType = propertyToPropertyType_.get(relTypeName);
+					conceptUtility_.addRelationship(concept, axisConcept.getPrimordialUuid(), relType.getPropertyUUID(relTypeName), null);
 				}
 				else if (pt instanceof PT_SkipClass)
 				{
 					//See if this class object exists yet.
-					UUID potential = UUID.nameUUIDFromBytes((uuidRoot_ + ":" + 
+					UUID potential = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + 
 							pt_SkipClass_.getPropertyTypeDescription() + ":" +  
 							fieldMapInverse_.get(fieldIndex) + ":" + 
 							fields[fieldIndex]).getBytes());
@@ -504,21 +517,25 @@ public class LoincToEConcepts extends AbstractMojo
 					if (classConcept == null)
 					{
 
-						classConcept = conceptUtility_.createConcept(potential, classMapping_.getMatchValue(fields[fieldIndex]), System.currentTimeMillis());
+						classConcept = conceptUtility_.createConcept(potential, classMapping_.getMatchValue(fields[fieldIndex]),null);
 						if (classMapping_.hasMatch(fields[fieldIndex]))
 						{
 							conceptUtility_.addAdditionalIds(classConcept, fields[fieldIndex], 
 								propertyToPropertyType_.get("ABBREVIATION").getPropertyUUID("ABBREVIATION"), false);
 						}
-						conceptUtility_.addRelationship(classConcept, pt_SkipClass_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), null);
+						conceptUtility_.addRelationship(classConcept, pt_SkipClass_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), null, null);
 						concepts_.put(classConcept.primordialUuid, classConcept);
 					}
-					conceptUtility_.addAnnotation(concept, classConcept, pt_SkipClass_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)));
+					//We changed these from attributes to relations
+					//conceptUtility_.addAnnotation(concept, classConcept, pt_SkipClass_.getPropertyUUID(fieldMapInverse_.get(fieldIndex)));
+					String relTypeName = "Has_" + fieldMapInverse_.get(fieldIndex);
+					PropertyType relType = propertyToPropertyType_.get(relTypeName);
+					conceptUtility_.addRelationship(concept, classConcept.getPrimordialUuid(), relType.getPropertyUUID(relTypeName), null);
 				}
 				else if (pt instanceof PT_Relations)
 				{
 					conceptUtility_.addRelationship(concept, buildUUID(fields[fieldIndex]), 
-							pt.getPropertyUUID(fieldMapInverse_.get(fieldIndex))); 
+							pt.getPropertyUUID(fieldMapInverse_.get(fieldIndex)), null); 
 				}
 				else if (pt instanceof PT_SkipOther)
 				{
@@ -579,21 +596,21 @@ public class LoincToEConcepts extends AbstractMojo
 			concept = conceptUtility_.createConcept(potential, codeText, System.currentTimeMillis());
 			if (sequence != null && sequence.length() > 0)
 			{
-				conceptUtility_.addAnnotation(concept, sequence, propertyToPropertyType_.get("SEQUENCE").getPropertyUUID("SEQUENCE"), false);
+				conceptUtility_.addStringAnnotation(concept, sequence, propertyToPropertyType_.get("SEQUENCE").getPropertyUUID("SEQUENCE"), false);
 			}
 			
 			if (immediateParentString != null && immediateParentString.length() > 0)
 			{
-				conceptUtility_.addAnnotation(concept, immediateParentString, propertyToPropertyType_.get("IMMEDIATE_PARENT").getPropertyUUID("IMMEDIATE_PARENT"), false);
+				conceptUtility_.addStringAnnotation(concept, immediateParentString, propertyToPropertyType_.get("IMMEDIATE_PARENT").getPropertyUUID("IMMEDIATE_PARENT"), false);
 			}
 			
 			conceptUtility_.addDescription(concept, codeText, propertyToPropertyType_.get("CODE_TEXT").getPropertyUUID("CODE_TEXT"), false);
 			
-			conceptUtility_.addRelationship(concept, immediateParent, propertyToPropertyType_.get("Multiaxial Child Of").getPropertyUUID("Multiaxial Child Of"));
+			conceptUtility_.addRelationship(concept, immediateParent, propertyToPropertyType_.get("Multiaxial Child Of").getPropertyUUID("Multiaxial Child Of"), null);
 			
 			if (pathString != null && pathString.length() > 0)
 			{
-				conceptUtility_.addAnnotation(concept, pathString, propertyToPropertyType_.get("PATH_TO_ROOT").getPropertyUUID("PATH_TO_ROOT"), false);
+				conceptUtility_.addStringAnnotation(concept, pathString, propertyToPropertyType_.get("PATH_TO_ROOT").getPropertyUUID("PATH_TO_ROOT"), false);
 			}
 			conceptUtility_.addAdditionalIds(concept, code, propertyToPropertyType_.get("CODE").getPropertyUUID("CODE"), false);
 			
@@ -626,7 +643,7 @@ public class LoincToEConcepts extends AbstractMojo
 			}
 			if (!found)
 			{
-				conceptUtility_.addRelationship(concept, target, propertyToPropertyType_.get("Multiaxial Child Of").getPropertyUUID("Multiaxial Child Of"));
+				conceptUtility_.addRelationship(concept, target, propertyToPropertyType_.get("Multiaxial Child Of").getPropertyUUID("Multiaxial Child Of"), null);
 			}
 			concept = concepts_.get(target);
 			if (concept == null)
@@ -682,9 +699,7 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	private UUID buildUUID(String uniqueIdentifier)
 	{
-		UUID uuid = UUID.nameUUIDFromBytes((uuidRoot_ + ":" + uniqueIdentifier).getBytes());
-		UUIDInfo.add(uuid, uuidRoot_ + ":" + uniqueIdentifier);
-		return uuid;
+		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + uniqueIdentifier).getBytes());
 	}
 	
 	/**
@@ -692,8 +707,8 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	private EConcept createAuxEConcept(UUID primordial, String name, UUID relParentPrimordial) throws Exception
 	{
-		EConcept concept = conceptUtility_.createConcept(primordial, name, System.currentTimeMillis());
-		conceptUtility_.addRelationship(concept, relParentPrimordial, null);
+		EConcept concept = conceptUtility_.createConcept(primordial, name, null);
+		conceptUtility_.addRelationship(concept, relParentPrimordial, null, null);
 		return concept;
 	}
 

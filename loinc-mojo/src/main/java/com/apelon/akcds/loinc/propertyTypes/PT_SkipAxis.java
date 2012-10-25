@@ -10,7 +10,7 @@ public class PT_SkipAxis extends PT_Skip
 {
 	public PT_SkipAxis(String uuidRoot)
 	{
-		super("Loinc Axis", uuidRoot);
+		super("LOINC Axis", uuidRoot);
 		//axis 1 - 6
 		addPropertyName("COMPONENT");
 		addPropertyName("PROPERTY");
