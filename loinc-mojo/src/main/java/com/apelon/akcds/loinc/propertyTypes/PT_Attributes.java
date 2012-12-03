@@ -1,15 +1,16 @@
 package com.apelon.akcds.loinc.propertyTypes;
 
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Attributes;
 
 /**
  * Fields to treat as attributes
  * @author Daniel Armbrust
  */
-public class PT_Attributes extends PropertyType
+public class PT_Attributes extends BPT_Attributes
 {
 	public PT_Attributes(String uuidRoot)
 	{
-		super("Attribute Types", uuidRoot);
+		super(uuidRoot);
 		
 		addPropertyName("DT_LAST_CH", 0, 1);  //replaced with DATE_LAST_CHANGED in 2.38
 		addPropertyName("DATE_LAST_CHANGED", 2, 0);

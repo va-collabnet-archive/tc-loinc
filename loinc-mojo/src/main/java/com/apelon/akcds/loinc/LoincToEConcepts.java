@@ -2,6 +2,8 @@ package com.apelon.akcds.loinc;
 
 import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
 import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility;
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -29,11 +31,9 @@ import com.apelon.akcds.loinc.propertyTypes.PT_ContentVersion;
 import com.apelon.akcds.loinc.propertyTypes.PT_Descriptions;
 import com.apelon.akcds.loinc.propertyTypes.PT_IDs;
 import com.apelon.akcds.loinc.propertyTypes.PT_Relations;
-import com.apelon.akcds.loinc.propertyTypes.PT_Skip;
 import com.apelon.akcds.loinc.propertyTypes.PT_SkipAxis;
 import com.apelon.akcds.loinc.propertyTypes.PT_SkipClass;
 import com.apelon.akcds.loinc.propertyTypes.PT_SkipOther;
-import com.apelon.akcds.loinc.propertyTypes.PropertyType;
 
 /**
  * 
@@ -244,7 +244,7 @@ public class LoincToEConcepts extends AbstractMojo
 			//And for all of the other property types
 			for (PropertyType pt : propertyTypes_)
 			{
-				if (pt instanceof PT_Skip)
+				if (pt instanceof BPT_Skip)
 				{
 					continue;
 				}
@@ -291,8 +291,8 @@ public class LoincToEConcepts extends AbstractMojo
 			//Root
 			EConcept rootConcept = conceptUtility_.createConcept("LOINC", "LOINC");
 			
-			conceptUtility_.addDescription(rootConcept, version, contentVersion_.getPropertyUUID("version"), false);
-			conceptUtility_.addDescription(rootConcept, releaseDate, contentVersion_.getPropertyUUID("releaseDate"), false);
+			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getPropertyUUID("version"), false);
+			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getPropertyUUID("releaseDate"), false);
 			
 			concepts_.put(rootConcept.primordialUuid, rootConcept);
 			
@@ -703,7 +703,7 @@ public class LoincToEConcepts extends AbstractMojo
 	}
 	
 	/**
-	 * Utility method to build and store a metadata concept.
+	 * Utility method to build a metadata concept.
 	 */
 	private EConcept createAuxEConcept(UUID primordial, String name, UUID relParentPrimordial) throws Exception
 	{

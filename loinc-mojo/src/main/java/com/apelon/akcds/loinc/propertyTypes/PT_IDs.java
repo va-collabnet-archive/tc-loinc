@@ -1,15 +1,17 @@
 package com.apelon.akcds.loinc.propertyTypes;
 
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_IDs;
+
 
 /**
  * Fields to treat as IDs
  * @author Daniel Armbrust
  */
-public class PT_IDs extends PropertyType
+public class PT_IDs extends BPT_IDs
 {
 	public PT_IDs(String uuidRoot)
 	{
-		super("ID Types", uuidRoot);
+		super(uuidRoot);
 		addPropertyName("LOINC_NUM");
 		addPropertyName("NAACCR_ID");
 		
