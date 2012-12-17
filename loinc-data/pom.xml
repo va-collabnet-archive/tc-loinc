@@ -6,13 +6,18 @@
 	<parent>
 		<groupId>gov.va.oia.terminology.converters</groupId>
 		<artifactId>loinc</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.4</version>
 	</parent>
-	
-	<artifactId>loinc-data</artifactId>
-	<packaging>pom</packaging>
-	<name>loinc-data</name>
-	<version>2.40-build-3</version>
+    
+    <artifactId>loinc-data</artifactId>
+    <packaging>pom</packaging>
+    <name>loinc-data</name>
+    <!-- this should be set to ${sourceData.version}-loader-${project.parent.version} but that doesn't appease the maven gods that know best.... -->
+    <version>2.40-loader-1.4</version>
+    
+    <properties>
+        <sourceData.version>2.40</sourceData.version>
+    </properties>
 
 	<build>
 		<plugins>
@@ -51,7 +56,7 @@
                                 <artifactItem>
                                     <groupId>gov.va.oia.terminology.source.loinc</groupId>
                                     <artifactId>loinc-src-data</artifactId>
-                                    <version>2.40</version>
+                                    <version>${sourceData.version}</version>
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
@@ -62,9 +67,9 @@
             </plugin>
             
 			<plugin>
-				<groupId>gov.va.oia.terminology.converters</groupId>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>loinc-mojo</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${project.parent.version}</version>
 				<executions>
 					<execution>
 						<id>generate-jbin</id>

@@ -15,5 +15,6 @@ public class PT_ContentVersion extends BPT_ContentVersion
 		super(uuidRoot);
 		addPropertyName("version");
 		addPropertyName("releaseDate");
+		addPropertyName("loaderVersion");
 	}
 }

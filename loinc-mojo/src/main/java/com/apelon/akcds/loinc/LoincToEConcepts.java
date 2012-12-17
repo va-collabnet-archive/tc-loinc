@@ -65,6 +65,15 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	private File loincDataFiles;
 	
+	/**
+	 * Loader version number
+	 * Use parent because project.version pulls in the version of the data file, which I don't want.
+	 * 
+	 * @parameter expression="${project.parent.version}"
+	 * @required
+	 */
+	private String loaderVersion;
+	
 	private DataOutputStream dos_;
 	private EConceptUtility conceptUtility_;
 
@@ -293,6 +302,7 @@ public class LoincToEConcepts extends AbstractMojo
 			
 			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getPropertyUUID("version"), false);
 			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getPropertyUUID("releaseDate"), false);
+			conceptUtility_.addStringAnnotation(rootConcept, loaderVersion, contentVersion_.getPropertyUUID("loaderVersion"), false);
 			
 			concepts_.put(rootConcept.primordialUuid, rootConcept);
 			
