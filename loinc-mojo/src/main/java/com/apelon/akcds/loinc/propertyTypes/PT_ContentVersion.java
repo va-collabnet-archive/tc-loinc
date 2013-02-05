@@ -13,8 +13,6 @@ public class PT_ContentVersion extends BPT_ContentVersion
 	public PT_ContentVersion(String uuidRoot)
 	{
 		super(uuidRoot);
-		addPropertyName("version");
-		addPropertyName("releaseDate");
-		addPropertyName("loaderVersion");
+		addProperty("Source Version");
 	}
 }

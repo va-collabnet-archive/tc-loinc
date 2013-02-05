@@ -12,15 +12,15 @@ public class PT_IDs extends BPT_IDs
 	public PT_IDs(String uuidRoot)
 	{
 		super(uuidRoot);
-		addPropertyName("LOINC_NUM");
-		addPropertyName("NAACCR_ID");
+		addProperty("LOINC_NUM");
+		addProperty("NAACCR_ID");
 		
 		//Abbrev Codes used by axis and class
-		addPropertyName("ABBREVIATION");
+		addProperty("ABBREVIATION");
 		
 		//From multi-axial class
-		addPropertyName("PATH_TO_ROOT");
-		addPropertyName("CODE");
+		addProperty("PATH_TO_ROOT");
+		addProperty("CODE");
 		
 	}
 }

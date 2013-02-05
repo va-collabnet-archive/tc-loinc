@@ -15,7 +15,7 @@ public class PT_SkipOther extends BPT_Skip
 		super("Skip Other", uuidRoot);
 		
 		//Not Loaded
-		addPropertyName("SOURCE");
-		addDisabledPropertyName("FINAL", 0, 1);	//deleted in 2.38
+		addProperty("SOURCE");
+		addProperty("FINAL", null, 0, 1, true);	//deleted in 2.38
 	}
 }

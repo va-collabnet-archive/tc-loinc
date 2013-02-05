@@ -15,16 +15,16 @@ public class PT_Descriptions extends BPT_Descriptions
 	{
 		super( uuidRoot);
 
-		addDisabledPropertyName("RELAT_NMS", 0, 1);  	//deleted in 2.38
-		addPropertyName("CONSUMER_NAME");
-		addPropertyName("EXACT_CMP_SY", 0, 1);			//deleted in 2.38
-		addPropertyName("ACSSYM");
-		addPropertyName("BASE_NAME");
-		addPropertyName("RELATEDNAMES2");
-		addPropertyName("SHORTNAME");
-		addPropertyName("LONG_COMMON_NAME");
+		addProperty("RELAT_NMS", null, 0, 1, true);  	//deleted in 2.38
+		addProperty("CONSUMER_NAME");
+		addProperty("EXACT_CMP_SY", 0, 1);			//deleted in 2.38
+		addProperty("ACSSYM");
+		addProperty("BASE_NAME");
+		addProperty("RELATEDNAMES2");
+		addProperty("SHORTNAME");
+		addProperty("LONG_COMMON_NAME");
 		
 		//from multiaxial
-		addPropertyName("CODE_TEXT");
+		addProperty("CODE_TEXT");
 	}
 }

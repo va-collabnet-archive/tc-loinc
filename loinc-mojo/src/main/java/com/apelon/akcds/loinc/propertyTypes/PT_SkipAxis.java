@@ -14,12 +14,12 @@ public class PT_SkipAxis extends BPT_Skip
 	{
 		super("LOINC Axis", uuidRoot);
 		//axis 1 - 6
-		addPropertyName("COMPONENT");
-		addPropertyName("PROPERTY");
-		addPropertyName("TIME_ASPCT");
-		addPropertyName("SYSTEM");
-		addPropertyName("SCALE_TYP");
-		addPropertyName("METHOD_TYP");
+		addProperty("COMPONENT");
+		addProperty("PROPERTY");
+		addProperty("TIME_ASPCT");
+		addProperty("SYSTEM");
+		addProperty("SCALE_TYP");
+		addProperty("METHOD_TYP");
 
 	}
 }

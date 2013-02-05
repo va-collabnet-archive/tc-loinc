@@ -15,6 +15,6 @@ public class PT_SkipClass extends BPT_Skip
 		super("LOINC Class", uuidRoot);
 		
 		//special handling
-		addPropertyName("CLASS");
+		addProperty("CLASS");
 	}
 }
