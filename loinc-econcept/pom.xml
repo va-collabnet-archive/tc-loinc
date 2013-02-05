@@ -9,9 +9,9 @@
 		<version>1.5</version>
 	</parent>
     
-    <artifactId>loinc-data</artifactId>
+    <artifactId>loinc-econcept</artifactId>
     <packaging>pom</packaging>
-    <name>loinc-data</name>
+    <name>loinc-econcept</name>
     <!-- this should be set to ${sourceData.version}-loader-${project.parent.version} but that doesn't appease the maven gods that know best.... -->
     <version>2.40-loader-1.5</version>
     

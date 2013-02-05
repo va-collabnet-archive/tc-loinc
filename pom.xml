@@ -71,7 +71,7 @@
   </build>
 
   <modules>
-    <module>loinc-data</module>
+    <module>loinc-econcept</module>
     <module>loinc-mojo</module>
   </modules>
 </project>
