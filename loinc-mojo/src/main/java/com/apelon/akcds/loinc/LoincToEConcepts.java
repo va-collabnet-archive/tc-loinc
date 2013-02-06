@@ -75,6 +75,14 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	private String loaderVersion;
 	
+	/**
+     * Content version number
+     * 
+     * @parameter expression="${project.version}"
+     * @required
+     */
+    private String releaseVersion;
+	
 	private DataOutputStream dos_;
 	private EConceptUtility conceptUtility_;
 
@@ -296,7 +304,8 @@ public class LoincToEConcepts extends AbstractMojo
 			EConcept rootConcept = conceptUtility_.createConcept("LOINC", "LOINC");
 			
 			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getProperty("Source Version").getUUID(), false);
-			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, BaseContentVersion.RELEASE.getProperty().getUUID(), false);
+			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getProperty("Release Date").getUUID(), false);
+			conceptUtility_.addStringAnnotation(rootConcept, releaseVersion, BaseContentVersion.RELEASE.getProperty().getUUID(), false);
 			conceptUtility_.addStringAnnotation(rootConcept, loaderVersion, BaseContentVersion.LOADER_VERSION.getProperty().getUUID(), false);
 			
 			concepts_.put(rootConcept.primordialUuid, rootConcept);
