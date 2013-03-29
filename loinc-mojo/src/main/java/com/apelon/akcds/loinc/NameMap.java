@@ -2,9 +2,8 @@ package com.apelon.akcds.loinc;
 
 import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Hashtable;
 
 /**
@@ -21,9 +20,10 @@ public class NameMap
 {
 	private Hashtable<String, String> map_ = new Hashtable<String, String>();
 	
-	public NameMap(File file) throws IOException
+	public NameMap(String mapFileName) throws IOException
 	{
-		BufferedReader in = new BufferedReader(new FileReader(file));
+		ConsoleUtil.println("Using the class map file " + mapFileName);
+		BufferedReader in = new BufferedReader(new InputStreamReader(NameMap.class.getResourceAsStream("/" + mapFileName)));
 		
 		String key = null;
 		String value = null;
@@ -46,7 +46,7 @@ public class NameMap
 				String old = map_.put(key.toLowerCase(), value);
 				if (old != null)
 				{
-					ConsoleUtil.printErrorln("Map file " + file + " has dupliate definition for " + key);
+					ConsoleUtil.printErrorln("Map file " + mapFileName + " has dupliate definition for " + key);
 				}
 				key = null;
 				value = null;

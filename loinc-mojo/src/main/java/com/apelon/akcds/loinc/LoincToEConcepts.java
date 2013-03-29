@@ -170,17 +170,12 @@ public class LoincToEConcepts extends AbstractMojo
 			}
 			
 			
-			File classMappingFile = null;
 			File loincDataFile = null;
 			File loincMultiDataFile = null;
 			
 			for (File f : loincDataFiles.listFiles())
 			{
-				if (f.getName().toLowerCase().startsWith("classmappings"))
-				{
-					classMappingFile = f;
-				}
-				else if (f.getName().toLowerCase().equals("loincdb.txt"))
+				if (f.getName().toLowerCase().equals("loincdb.txt"))
 				{
 					loincDataFile = f;
 				}
@@ -190,14 +185,6 @@ public class LoincToEConcepts extends AbstractMojo
 				}
 			}
 			
-			if (classMappingFile == null)
-			{
-				throw new MojoExecutionException("Could not find the class mappings file in " + loincDataFiles.getAbsolutePath());
-			}
-			else
-			{
-				ConsoleUtil.println("Using the class mapping file " + classMappingFile.getAbsolutePath());
-			}
 			if (loincDataFile == null)
 			{
 				throw new MojoExecutionException("Could not find the loinc data file in " + loincDataFiles.getAbsolutePath());
@@ -215,8 +202,6 @@ public class LoincToEConcepts extends AbstractMojo
 				ConsoleUtil.println("Using the multi-axial file " + loincMultiDataFile.getAbsolutePath());
 			}
 			
-			classMapping_ = new NameMap(classMappingFile);
-			
 			dataReader = new BufferedReader(new FileReader(loincDataFile));
 			multiDataReader = new BufferedReader(new FileReader(loincMultiDataFile));
 			
@@ -224,23 +209,31 @@ public class LoincToEConcepts extends AbstractMojo
 			String version = dataReader.readLine();
 			String releaseDate = dataReader.readLine();
 			
+			String mapFileName = null;
+			
 			if (version.contains("2.36"))
 			{
 				PropertyType.setSourceVersion(1);
+				mapFileName = "classMappings-2.36.txt";
 			}
 			else if (version.contains("2.38"))
 			{
 				PropertyType.setSourceVersion(2);
+				mapFileName = "classMappings-2.36.txt";  //Yes, wrong one, never made the file for 2.38
 			}
 			else if (version.contains("2.40"))
 			{
 				PropertyType.setSourceVersion(3);
+				mapFileName = "classMappings-2.40.txt";
 			}
 			else
 			{
 				ConsoleUtil.printErrorln("ERROR: UNTESTED VERSION - NO TESTED PROPERTY MAPPING EXISTS!");
 				PropertyType.setSourceVersion(3);
+				mapFileName = "classMappings-2.40.txt";
 			}
+			
+			classMapping_ = new NameMap(mapFileName);
 
 			initProperties();
 			

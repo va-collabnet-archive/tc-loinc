@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>gov.va.oia.terminology.converters</groupId>
 		<artifactId>loinc</artifactId>
-		<version>1.5</version>
+		<version>1.6</version>
 	</parent>
-    
-    <artifactId>loinc-econcept</artifactId>
-    <packaging>pom</packaging>
-    <name>loinc-econcept</name>
+
+	<artifactId>loinc-econcept</artifactId>
+	<packaging>pom</packaging>
+	<name>loinc-econcept</name>
     <!-- this should be set to ${sourceData.version}-loader-${project.parent.version} but that doesn't appease the maven gods that know best.... -->
-    <version>2.40-loader-1.5</version>
-    
-    <properties>
-        <sourceData.version>2.40</sourceData.version>
-    </properties>
+	<version>2.40-loader-1.6</version>
+
+	<properties>
+		<sourceData.version>2.40</sourceData.version>
+	</properties>
 
 	<build>
 		<plugins>
-		    <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -41,35 +40,35 @@
 			</plugin>
             
             <!-- Get source files from archiva -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>fetch-loinc-src</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>gov.va.oia.terminology.source.loinc</groupId>
-                                    <artifactId>loinc-src-data</artifactId>
-                                    <version>${sourceData.version}</version>
-                                    <type>zip</type>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}/generated-resources/src</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>fetch-loinc-src</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>gov.va.oia.terminology.source.loinc</groupId>
+									<artifactId>loinc-src-data</artifactId>
+									<version>${sourceData.version}</version>
+									<type>zip</type>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/generated-resources/src</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>loinc-mojo</artifactId>
-                <version>${project.parent.version}</version>
+				<version>${project.parent.version}</version>
 				<executions>
 					<execution>
 						<id>generate-jbin</id>
