@@ -151,7 +151,6 @@ public class LoincToEConcepts extends AbstractMojo
 
 	public void execute() throws MojoExecutionException
 	{
-		ConverterUUID.enableDupeUUIDException = false;
 		ConsoleUtil.println("LOINC Processing Begins " + new Date().toString());
 		BufferedReader dataReader = null;
 		BufferedReader multiDataReader = null;
