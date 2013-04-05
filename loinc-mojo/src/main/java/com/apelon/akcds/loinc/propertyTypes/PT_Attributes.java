@@ -16,9 +16,9 @@ public class PT_Attributes extends BPT_Attributes
 		addProperty("DATE_LAST_CHANGED", 2, 0);
 		addProperty("CHNG_TYPE");
 		addProperty("COMMENTS");
-		addProperty("ANSWERLIST", null, 0, 1, true);  	//deleted in 2.38
-		addProperty("SCOPE", null, 0, 1, true);			//deleted in 2.38
-		addProperty("IPCC_UNITS", null, 0, 1, true);	//deleted in 2.38
+		addProperty("ANSWERLIST", null, null, 0, 1, true);  	//deleted in 2.38
+		addProperty("SCOPE", null, null, 0, 1, true);			//deleted in 2.38
+		addProperty("IPCC_UNITS", null, null, 0, 1, true);	//deleted in 2.38
 		addProperty("REFERENCE", 0, 1);				//deleted in 2.38
 		addProperty("MOLAR_MASS");
 		addProperty("CLASSTYPE");
@@ -27,7 +27,7 @@ public class PT_Attributes extends BPT_Attributes
 		addProperty("EXMPL_ANSWERS");
 		addProperty("CODE_TABLE");
 		addProperty("SETROOT", 0, 1);				//deleted in 2.38
-		addProperty("PANELELEMENTS", null, 0, 1, true);	//deleted in 2.38
+		addProperty("PANELELEMENTS", null, null, 0, 1, true);	//deleted in 2.38
 		addProperty("SURVEY_QUEST_TEXT");
 		addProperty("SURVEY_QUEST_SRC");
 		addProperty("UNITSREQUIRED");

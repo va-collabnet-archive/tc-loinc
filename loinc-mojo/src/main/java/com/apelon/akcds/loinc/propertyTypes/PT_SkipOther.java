@@ -16,6 +16,6 @@ public class PT_SkipOther extends BPT_Skip
 		
 		//Not Loaded
 		addProperty("SOURCE");
-		addProperty("FINAL", null, 0, 1, true);	//deleted in 2.38
+		addProperty("FINAL", null, null, 0, 1, true);	//deleted in 2.38
 	}
 }

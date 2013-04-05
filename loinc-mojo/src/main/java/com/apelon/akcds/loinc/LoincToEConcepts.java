@@ -5,6 +5,7 @@ import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_ContentVersion.BaseContentVersion;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.ValuePropertyPair;
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -450,17 +451,8 @@ public class LoincToEConcepts extends AbstractMojo
 
 		String code = fields[fieldMap_.get("LOINC_NUM")];
 
-		String description = fields[fieldMap_.get("LONG_COMMON_NAME")];
-		if (description == null)
-		{
-			description = fields[fieldMap_.get("SHORTNAME")];
-		}
-		if (description == null)
-		{
-			ConsoleUtil.printErrorln("no name for " + code);
-			description = code;
-		}
-		EConcept concept = conceptUtility_.createConcept(buildUUID(code), description, time, statusUUID);
+		EConcept concept = conceptUtility_.createConcept(buildUUID(code), time, statusUUID);
+		ArrayList<ValuePropertyPair> descriptions = new ArrayList<>();
 
 		for (int fieldIndex = 0; fieldIndex < fields.length; fieldIndex++)
 		{
@@ -481,7 +473,8 @@ public class LoincToEConcepts extends AbstractMojo
 				}
 				else if (pt instanceof PT_Descriptions)
 				{
-					conceptUtility_.addDescription(concept, fields[fieldIndex], p.getUUID(), p.isDisabled());
+					//Gather for later
+					descriptions.add(new ValuePropertyPair(fields[fieldIndex], p));
 				}
 				else if (pt instanceof PT_IDs)
 				{
@@ -499,7 +492,7 @@ public class LoincToEConcepts extends AbstractMojo
 					if (axisConcept == null)
 					{
 						axisConcept = conceptUtility_.createConcept(potential, fields[fieldIndex]);
-						conceptUtility_.addRelationship(axisConcept, pt_SkipAxis_.getProperty(fieldMapInverse_.get(fieldIndex)).getUUID(), null, null);
+						conceptUtility_.addRelationship(axisConcept, pt_SkipAxis_.getProperty(fieldMapInverse_.get(fieldIndex)).getUUID());
 						concepts_.put(axisConcept.primordialUuid, axisConcept);
 					}
 					// We changed these from attributes to relations
@@ -526,7 +519,7 @@ public class LoincToEConcepts extends AbstractMojo
 							conceptUtility_.addAdditionalIds(classConcept, fields[fieldIndex], propertyToPropertyType_.get("ABBREVIATION").getProperty("ABBREVIATION")
 									.getUUID(), false);
 						}
-						conceptUtility_.addRelationship(classConcept, pt_SkipClass_.getProperty(fieldMapInverse_.get(fieldIndex)).getUUID(), null, null);
+						conceptUtility_.addRelationship(classConcept, pt_SkipClass_.getProperty(fieldMapInverse_.get(fieldIndex)).getUUID());
 						concepts_.put(classConcept.primordialUuid, classConcept);
 					}
 					// We changed these from attributes to relations
@@ -537,7 +530,7 @@ public class LoincToEConcepts extends AbstractMojo
 				}
 				else if (pt instanceof PT_Relations)
 				{
-					conceptUtility_.addRelationship(concept, buildUUID(fields[fieldIndex]), pt.getProperty(fieldMapInverse_.get(fieldIndex)).getUUID(), null);
+					conceptUtility_.addRelationship(concept, buildUUID(fields[fieldIndex]), pt.getProperty(fieldMapInverse_.get(fieldIndex)), null);
 				}
 				else if (pt instanceof PT_SkipOther)
 				{
@@ -548,6 +541,17 @@ public class LoincToEConcepts extends AbstractMojo
 					ConsoleUtil.printErrorln("oops - unexpected property type: " + pt);
 				}
 			}
+		}
+		
+		//Now add all the descriptions
+		if (descriptions.size() == 0)
+		{
+			ConsoleUtil.printErrorln("no name for " + code);
+			conceptUtility_.addFullySpecifiedName(concept, code);
+		}
+		else
+		{
+			conceptUtility_.addDescriptions(concept, descriptions);
 		}
 
 		concepts_.put(concept.primordialUuid, concept);
@@ -595,7 +599,7 @@ public class LoincToEConcepts extends AbstractMojo
 		EConcept concept = concepts_.get(potential);
 		if (concept == null)
 		{
-			concept = conceptUtility_.createConcept(potential, codeText);
+			concept = conceptUtility_.createConcept(potential);
 			if (sequence != null && sequence.length() > 0)
 			{
 				conceptUtility_.addStringAnnotation(concept, sequence, propertyToPropertyType_.get("SEQUENCE").getProperty("SEQUENCE").getUUID(), false);
@@ -607,10 +611,10 @@ public class LoincToEConcepts extends AbstractMojo
 						.getUUID(), false);
 			}
 
-			conceptUtility_.addDescription(concept, codeText, propertyToPropertyType_.get("CODE_TEXT").getProperty("CODE_TEXT").getUUID(), false);
+			ValuePropertyPair vpp = new ValuePropertyPair(codeText, propertyToPropertyType_.get("CODE_TEXT").getProperty("CODE_TEXT"));
+			conceptUtility_.addDescriptions(concept, Arrays.asList(vpp));  //This will get added as FSN
 
-			conceptUtility_.addRelationship(concept, immediateParent, propertyToPropertyType_.get("Multiaxial Child Of").getProperty("Multiaxial Child Of").getUUID(),
-					null);
+			conceptUtility_.addRelationship(concept, immediateParent, propertyToPropertyType_.get("Multiaxial Child Of").getProperty("Multiaxial Child Of"), null);
 
 			if (pathString != null && pathString.length() > 0)
 			{
@@ -646,7 +650,7 @@ public class LoincToEConcepts extends AbstractMojo
 			}
 			if (!found)
 			{
-				conceptUtility_.addRelationship(concept, target, propertyToPropertyType_.get("Multiaxial Child Of").getProperty("Multiaxial Child Of").getUUID(), null);
+				conceptUtility_.addRelationship(concept, target, propertyToPropertyType_.get("Multiaxial Child Of").getProperty("Multiaxial Child Of"), null);
 			}
 			concept = concepts_.get(target);
 			if (concept == null)
