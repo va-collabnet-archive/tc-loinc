@@ -291,7 +291,7 @@ public class LoincToEConcepts extends AbstractMojo
 			checkForLeftoverPropertyTypes(headerFields);
 
 			// Root
-			EConcept rootConcept = conceptUtility_.createConcept("LOINC", "LOINC");
+			EConcept rootConcept = conceptUtility_.createConcept("LOINC");
 
 			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getProperty("Source Version").getUUID(), false);
 			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getProperty("Release Date").getUUID(), false);
