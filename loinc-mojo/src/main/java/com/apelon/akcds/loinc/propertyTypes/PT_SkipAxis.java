@@ -10,9 +10,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
  */
 public class PT_SkipAxis extends BPT_Skip
 {
-	public PT_SkipAxis(String uuidRoot)
+	public PT_SkipAxis()
 	{
-		super("LOINC Axis", uuidRoot);
+		super("LOINC Axis");
 		//axis 1 - 6
 		addProperty("COMPONENT");
 		addProperty("PROPERTY");

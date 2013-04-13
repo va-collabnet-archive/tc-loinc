@@ -86,14 +86,14 @@ public class LoincToEConcepts extends AbstractMojo
 	private DataOutputStream dos_;
 	private EConceptUtility conceptUtility_;
 
-	private final String uuidRoot_ = "gov.va.med.term.loinc:";
+	private final String loincNamespaceBaseSeed_ = "gov.va.med.term.loinc";
 
-	// Want a specific handle to these two - adhoc usage.
-	private final PropertyType contentVersion_ = new PT_ContentVersion(uuidRoot_);
+	// Want a specific handle to this - adhoc usage.
+	private PropertyType contentVersion_;
 
 	// Need a handle to these too.
-	private final PropertyType pt_SkipAxis_ = new PT_SkipAxis(uuidRoot_);
-	private final PropertyType pt_SkipClass_ = new PT_SkipClass(uuidRoot_);
+	private PropertyType pt_SkipAxis_;
+	private PropertyType pt_SkipClass_;
 
 	private final ArrayList<PropertyType> propertyTypes_ = new ArrayList<PropertyType>();
 
@@ -110,11 +110,6 @@ public class LoincToEConcepts extends AbstractMojo
 
 	private NameMap classMapping_;
 
-	public LoincToEConcepts()
-	{
-
-	}
-
 	/**
 	 * Used for debug. Sets up the same paths that maven would use.... allow the code to be run standalone.
 	 */
@@ -129,12 +124,12 @@ public class LoincToEConcepts extends AbstractMojo
 	private void initProperties()
 	{
 		// Can't init these till we know the data version
-		propertyTypes_.add(new PT_IDs(uuidRoot_));
-		propertyTypes_.add(new PT_Attributes(uuidRoot_));
-		propertyTypes_.add(new PT_Descriptions(uuidRoot_));
+		propertyTypes_.add(new PT_IDs());
+		propertyTypes_.add(new PT_Attributes());
+		propertyTypes_.add(new PT_Descriptions());
 		propertyTypes_.add(pt_SkipAxis_);
 		propertyTypes_.add(pt_SkipClass_);
-		PT_Relations r = new PT_Relations(uuidRoot_);
+		PT_Relations r = new PT_Relations();
 		// Create relations out of the skipAxis and SkipClass
 		for (String s : pt_SkipAxis_.getPropertyNames())
 		{
@@ -145,7 +140,7 @@ public class LoincToEConcepts extends AbstractMojo
 			r.addProperty("Has_" + s);
 		}
 		propertyTypes_.add(r);
-		propertyTypes_.add(new PT_SkipOther(uuidRoot_));
+		propertyTypes_.add(new PT_SkipOther());
 
 		propertyTypes_.add(contentVersion_);
 	}
@@ -153,6 +148,7 @@ public class LoincToEConcepts extends AbstractMojo
 	public void execute() throws MojoExecutionException
 	{
 		ConsoleUtil.println("LOINC Processing Begins " + new Date().toString());
+		
 		BufferedReader dataReader = null;
 		BufferedReader multiDataReader = null;
 		try
@@ -167,6 +163,14 @@ public class LoincToEConcepts extends AbstractMojo
 			{
 				throw new MojoExecutionException("LoincDataFiles must point to a directory containing the 3 required loinc data files");
 			}
+			
+			File binaryOutputFile = new File(outputDirectory, "loincEConcepts.jbin");
+			dos_ = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(binaryOutputFile)));
+			conceptUtility_ = new EConceptUtility(loincNamespaceBaseSeed_, "Loinc Path", dos_);
+			
+			contentVersion_ = new PT_ContentVersion();
+			pt_SkipAxis_ = new PT_SkipAxis();
+			pt_SkipClass_ = new PT_SkipClass();
 
 			File loincDataFile = null;
 			File loincMultiDataFile = null;
@@ -235,15 +239,11 @@ public class LoincToEConcepts extends AbstractMojo
 
 			initProperties();
 
-			File binaryOutputFile = new File(outputDirectory, "loincEConcepts.jbin");
-			dos_ = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(binaryOutputFile)));
-			conceptUtility_ = new EConceptUtility(uuidRoot_, "Loinc Path", dos_);
-
 			ConsoleUtil.println("Loading Metadata");
 
 			// Set up a meta-data root concept
 			UUID archRoot = ArchitectonicAuxiliary.Concept.ARCHITECTONIC_ROOT_CONCEPT.getPrimoridalUid();
-			UUID metaDataRoot = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + "metadata").getBytes());
+			UUID metaDataRoot = ConverterUUID.createNamespaceUUIDFromString("metadata");
 			conceptUtility_.createAndStoreMetaDataConcept(metaDataRoot, "LOINC Metadata", archRoot, dos_);
 
 			conceptUtility_.loadMetaDataItems(propertyTypes_, metaDataRoot, dos_);
@@ -483,10 +483,8 @@ public class LoincToEConcepts extends AbstractMojo
 				else if (pt instanceof PT_SkipAxis)
 				{
 					// See if this class object exists yet.
-					UUID potential = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + 
-							pt_SkipAxis_.getPropertyTypeDescription() + ":" +
-							fieldMapInverse_.get(fieldIndex) + ":" + 
-							fields[fieldIndex]).getBytes());
+					UUID potential = ConverterUUID.createNamespaceUUIDFromString(pt_SkipAxis_.getPropertyTypeDescription() + ":" +
+							fieldMapInverse_.get(fieldIndex) + ":" + fields[fieldIndex]);
 
 					EConcept axisConcept = concepts_.get(potential);
 					if (axisConcept == null)
@@ -504,15 +502,12 @@ public class LoincToEConcepts extends AbstractMojo
 				else if (pt instanceof PT_SkipClass)
 				{
 					// See if this class object exists yet.
-					UUID potential = ConverterUUID.nameUUIDFromBytes((uuidRoot_ + 
-							pt_SkipClass_.getPropertyTypeDescription() + ":" +  
-							fieldMapInverse_.get(fieldIndex) + ":" + 
-							fields[fieldIndex]).getBytes());
+					UUID potential = ConverterUUID.createNamespaceUUIDFromString(pt_SkipClass_.getPropertyTypeDescription() + ":" +
+							fieldMapInverse_.get(fieldIndex) + ":" + fields[fieldIndex]);
 
 					EConcept classConcept = concepts_.get(potential);
 					if (classConcept == null)
 					{
-
 						classConcept = conceptUtility_.createConcept(potential, classMapping_.getMatchValue(fields[fieldIndex]));
 						if (classMapping_.hasMatch(fields[fieldIndex]))
 						{
@@ -706,7 +701,7 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	private UUID buildUUID(String uniqueIdentifier)
 	{
-		return ConverterUUID.nameUUIDFromBytes((uuidRoot_ + uniqueIdentifier).getBytes());
+		return ConverterUUID.createNamespaceUUIDFromString(uniqueIdentifier);
 	}
 
 	private String[] getFields(String line)

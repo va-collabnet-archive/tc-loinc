@@ -10,9 +10,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_ContentVe
  */
 public class PT_ContentVersion extends BPT_ContentVersion
 {
-	public PT_ContentVersion(String uuidRoot)
+	public PT_ContentVersion()
 	{
-		super(uuidRoot);
+		super();
 		addProperty("Source Version");
 		addProperty("Release Date");
 	}

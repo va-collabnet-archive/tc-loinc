@@ -10,9 +10,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
  */
 public class PT_SkipClass extends BPT_Skip
 {
-	public PT_SkipClass(String uuidRoot)
+	public PT_SkipClass()
 	{
-		super("LOINC Class", uuidRoot);
+		super("LOINC Class");
 		
 		//special handling
 		addProperty("CLASS");

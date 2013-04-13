@@ -11,9 +11,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Descripti
  */
 public class PT_Descriptions extends BPT_Descriptions
 {
-	public PT_Descriptions(String uuidRoot)
+	public PT_Descriptions()
 	{
-		super(uuidRoot, "LOINC");
+		super("LOINC");
 
 		addProperty("RELAT_NMS", null, null, 0, 1, true, SYNONYM + 1);			//deleted in 2.38
 		addProperty("CONSUMER_NAME", SYNONYM + 1);

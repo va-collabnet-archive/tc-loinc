@@ -8,9 +8,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Attribute
  */
 public class PT_Attributes extends BPT_Attributes
 {
-	public PT_Attributes(String uuidRoot)
+	public PT_Attributes()
 	{
-		super(uuidRoot);
+		super();
 		
 		addProperty("DT_LAST_CH", 0, 1);  //replaced with DATE_LAST_CHANGED in 2.38
 		addProperty("DATE_LAST_CHANGED", 2, 0);

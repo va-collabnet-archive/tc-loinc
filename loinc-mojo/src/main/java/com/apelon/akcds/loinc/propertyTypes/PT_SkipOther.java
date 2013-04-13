@@ -10,9 +10,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
  */
 public class PT_SkipOther extends BPT_Skip
 {
-	public PT_SkipOther(String uuidRoot)
+	public PT_SkipOther()
 	{
-		super("Skip Other", uuidRoot);
+		super("Skip Other");
 		
 		//Not Loaded
 		addProperty("SOURCE");

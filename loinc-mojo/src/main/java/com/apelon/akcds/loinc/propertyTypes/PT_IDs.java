@@ -9,9 +9,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_IDs;
  */
 public class PT_IDs extends BPT_IDs
 {
-	public PT_IDs(String uuidRoot)
+	public PT_IDs()
 	{
-		super(uuidRoot);
+		super();
 		addProperty("LOINC_NUM");
 		addProperty("NAACCR_ID");
 		

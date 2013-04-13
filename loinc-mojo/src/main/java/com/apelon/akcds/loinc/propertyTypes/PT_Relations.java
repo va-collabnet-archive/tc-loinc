@@ -10,9 +10,9 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
  */
 public class PT_Relations extends BPT_Relations
 {
-	public PT_Relations(String uuidRoot)
+	public PT_Relations()
 	{
-		super(uuidRoot, "LOINC");
+		super("LOINC");
 		addProperty("MAP_TO");
 		
 		//Used for tree building
