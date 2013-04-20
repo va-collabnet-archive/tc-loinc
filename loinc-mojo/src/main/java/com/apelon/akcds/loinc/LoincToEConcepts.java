@@ -32,6 +32,7 @@ import com.apelon.akcds.loinc.propertyTypes.PT_Attributes;
 import com.apelon.akcds.loinc.propertyTypes.PT_ContentVersion;
 import com.apelon.akcds.loinc.propertyTypes.PT_Descriptions;
 import com.apelon.akcds.loinc.propertyTypes.PT_IDs;
+import com.apelon.akcds.loinc.propertyTypes.PT_Refsets;
 import com.apelon.akcds.loinc.propertyTypes.PT_Relations;
 import com.apelon.akcds.loinc.propertyTypes.PT_SkipAxis;
 import com.apelon.akcds.loinc.propertyTypes.PT_SkipClass;
@@ -94,6 +95,7 @@ public class LoincToEConcepts extends AbstractMojo
 	// Need a handle to these too.
 	private PropertyType pt_SkipAxis_;
 	private PropertyType pt_SkipClass_;
+	private PT_Refsets pt_refsets_;
 
 	private final ArrayList<PropertyType> propertyTypes_ = new ArrayList<PropertyType>();
 
@@ -143,6 +145,9 @@ public class LoincToEConcepts extends AbstractMojo
 		propertyTypes_.add(new PT_SkipOther());
 
 		propertyTypes_.add(contentVersion_);
+		
+		pt_refsets_ = new PT_Refsets();
+		propertyTypes_.add(pt_refsets_);
 	}
 
 	public void execute() throws MojoExecutionException
@@ -261,11 +266,8 @@ public class LoincToEConcepts extends AbstractMojo
 				}
 			}
 
-			EConcept vaRefsetsConcept = conceptUtility_.createVARefsetRootConcept();
-			vaRefsetsConcept.writeExternal(dos_);
-
 			// write this at the end
-			EConcept loincRefset = conceptUtility_.createConcept("All LOINC Concepts", vaRefsetsConcept.getPrimordialUuid());
+			EConcept loincRefset = pt_refsets_.getConcept(PT_Refsets.Refsets.ALL.getProperty());
 
 			// Scan forward in the data file for the "cutoff" point
 			int i = 0;
@@ -384,7 +386,7 @@ public class LoincToEConcepts extends AbstractMojo
 			int conCounter = 0;
 			for (EConcept concept : concepts_.values())
 			{
-				conceptUtility_.addRefsetMember(loincRefset, concept.getPrimordialUuid(), true, null);
+				conceptUtility_.addRefsetMember(loincRefset, concept.getPrimordialUuid(), null, true, null);
 				concept.writeExternal(dos_);
 				conCounter++;
 
@@ -398,7 +400,7 @@ public class LoincToEConcepts extends AbstractMojo
 				}
 			}
 
-			loincRefset.writeExternal(dos_);
+			conceptUtility_.storeRefsetConcepts(pt_refsets_, dos_);
 
 			ConsoleUtil.println("Data Load Summary:");
 			for (String s : conceptUtility_.getLoadStats().getSummary())
