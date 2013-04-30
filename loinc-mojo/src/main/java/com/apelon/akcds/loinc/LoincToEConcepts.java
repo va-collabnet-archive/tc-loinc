@@ -447,7 +447,7 @@ public class LoincToEConcepts extends AbstractMojo
 			index = fieldMap_.get("DATE_LAST_CHANGED");  // They changed this in 2.38 release
 		}
 		String lastChanged = fields[index];
-		long time = (lastChanged == null ? System.currentTimeMillis() : sdf_.parse(lastChanged).getTime());
+		long time = (lastChanged == null ? conceptUtility_.defaultTime_ : sdf_.parse(lastChanged).getTime());
 
 		UUID statusUUID = mapStatus(fields[fieldMap_.get("STATUS")]);
 
