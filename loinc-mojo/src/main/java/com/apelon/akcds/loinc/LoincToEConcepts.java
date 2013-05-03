@@ -291,6 +291,13 @@ public class LoincToEConcepts extends AbstractMojo
 
 			// validate that we are configured to map all properties properly
 			checkForLeftoverPropertyTypes(headerFields);
+			
+			ConsoleUtil.println("Metadata summary:");
+			for (String s : conceptUtility_.getLoadStats().getSummary())
+			{
+				ConsoleUtil.println("  " + s);
+			}
+			conceptUtility_.clearLoadStats();
 
 			// Root
 			EConcept rootConcept = conceptUtility_.createConcept("LOINC");
@@ -324,13 +331,6 @@ public class LoincToEConcepts extends AbstractMojo
 				EConcept temp = conceptUtility_.createConcept(pt_SkipAxis_.getProperty(property).getUUID(), property, axisConcept.primordialUuid);
 				concepts_.put(temp.primordialUuid, temp);
 			}
-
-			ConsoleUtil.println("Metadata summary:");
-			for (String s : conceptUtility_.getLoadStats().getSummary())
-			{
-				ConsoleUtil.println("  " + s);
-			}
-			conceptUtility_.clearLoadStats();
 
 			// load the data
 			ConsoleUtil.println("Reading data file into memory.");
@@ -399,6 +399,8 @@ public class LoincToEConcepts extends AbstractMojo
 					ConsoleUtil.println("Processed: " + conCounter + " - just completed " + concept.getDescriptions().get(0).getText());
 				}
 			}
+			
+			ConsoleUtil.println("Processed " + conCounter + " concepts total");
 
 			conceptUtility_.storeRefsetConcepts(pt_refsets_, dos_);
 
@@ -551,7 +553,11 @@ public class LoincToEConcepts extends AbstractMojo
 			conceptUtility_.addDescriptions(concept, descriptions);
 		}
 
-		concepts_.put(concept.primordialUuid, concept);
+		EConcept current = concepts_.put(concept.primordialUuid, concept);
+		if (current != null)
+		{
+			ConsoleUtil.printErrorln("Duplicate LOINC code (LOINC_NUM):" + code);
+		}
 	}
 
 	private void processMultiAxialData(UUID rootConcept, String line)
