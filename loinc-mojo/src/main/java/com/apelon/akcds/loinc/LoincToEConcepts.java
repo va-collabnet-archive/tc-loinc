@@ -171,7 +171,7 @@ public class LoincToEConcepts extends AbstractMojo
 			
 			File binaryOutputFile = new File(outputDirectory, "loincEConcepts.jbin");
 			dos_ = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(binaryOutputFile)));
-			conceptUtility_ = new EConceptUtility(loincNamespaceBaseSeed_, "Loinc Path", dos_);
+			conceptUtility_ = new EConceptUtility(loincNamespaceBaseSeed_, "LOINC Path", dos_);
 			
 			contentVersion_ = new PT_ContentVersion();
 			pt_SkipAxis_ = new PT_SkipAxis();
