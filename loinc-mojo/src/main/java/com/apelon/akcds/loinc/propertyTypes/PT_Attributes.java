@@ -56,5 +56,6 @@ public class PT_Attributes extends BPT_Attributes
 		//from multiaxial
 		addProperty("SEQUENCE");
 		addProperty("IMMEDIATE_PARENT");
+		addProperty("PATH_TO_ROOT");
 	}
 }

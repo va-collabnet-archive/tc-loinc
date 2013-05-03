@@ -19,7 +19,6 @@ public class PT_IDs extends BPT_IDs
 		addProperty("ABBREVIATION");
 		
 		//From multi-axial class
-		addProperty("PATH_TO_ROOT");
 		addProperty("CODE");
 		
 	}
