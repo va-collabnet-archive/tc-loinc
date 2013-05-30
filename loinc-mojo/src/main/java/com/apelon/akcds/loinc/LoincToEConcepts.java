@@ -488,7 +488,7 @@ public class LoincToEConcepts extends AbstractMojo
 				{
 					// See if this class object exists yet.
 					UUID potential = ConverterUUID.createNamespaceUUIDFromString(pt_SkipAxis_.getPropertyTypeDescription() + ":" +
-							fieldMapInverse_.get(fieldIndex) + ":" + fields[fieldIndex]);
+							fieldMapInverse_.get(fieldIndex) + ":" + fields[fieldIndex], true);
 
 					EConcept axisConcept = concepts_.get(potential);
 					if (axisConcept == null)
@@ -507,7 +507,7 @@ public class LoincToEConcepts extends AbstractMojo
 				{
 					// See if this class object exists yet.
 					UUID potential = ConverterUUID.createNamespaceUUIDFromString(pt_SkipClass_.getPropertyTypeDescription() + ":" +
-							fieldMapInverse_.get(fieldIndex) + ":" + fields[fieldIndex]);
+							fieldMapInverse_.get(fieldIndex) + ":" + fields[fieldIndex], true);
 
 					EConcept classConcept = concepts_.get(potential);
 					if (classConcept == null)
@@ -709,7 +709,7 @@ public class LoincToEConcepts extends AbstractMojo
 	 */
 	private UUID buildUUID(String uniqueIdentifier)
 	{
-		return ConverterUUID.createNamespaceUUIDFromString(uniqueIdentifier);
+		return ConverterUUID.createNamespaceUUIDFromString(uniqueIdentifier, true);
 	}
 
 	private String[] getFields(String line)
