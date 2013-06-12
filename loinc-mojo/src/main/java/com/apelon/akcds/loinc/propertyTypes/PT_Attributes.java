@@ -52,6 +52,7 @@ public class PT_Attributes extends BPT_Attributes
 		addProperty("COMMON_ORDER_RANK", 2, 0);			//added in 2.38
 		addProperty("STATUS");
 		addProperty("COMMON_SI_TEST_RANK", 3, 0);				//added in 2.40 (or maybe 2.39, 2.39 is untested)
+		addProperty("NAACCR_ID");  //Moved from ID - turned out it wasn't unique (see loinc_num 42040-6 and 39807-3)
 		
 		//from multiaxial
 		addProperty("SEQUENCE");

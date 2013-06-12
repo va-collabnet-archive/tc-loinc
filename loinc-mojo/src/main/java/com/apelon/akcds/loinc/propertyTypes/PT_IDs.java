@@ -13,7 +13,6 @@ public class PT_IDs extends BPT_IDs
 	{
 		super();
 		addProperty("LOINC_NUM");
-		addProperty("NAACCR_ID");
 		
 		//Abbrev Codes used by axis and class
 		addProperty("ABBREVIATION");
