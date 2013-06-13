@@ -249,7 +249,7 @@ public class LoincToEConcepts extends AbstractMojo
 			// Set up a meta-data root concept
 			UUID archRoot = ArchitectonicAuxiliary.Concept.ARCHITECTONIC_ROOT_CONCEPT.getPrimoridalUid();
 			UUID metaDataRoot = ConverterUUID.createNamespaceUUIDFromString("metadata");
-			conceptUtility_.createAndStoreMetaDataConcept(metaDataRoot, "LOINC Metadata", archRoot, dos_);
+			conceptUtility_.createAndStoreMetaDataConcept(metaDataRoot, "LOINC Metadata", false, archRoot, dos_);
 
 			conceptUtility_.loadMetaDataItems(propertyTypes_, metaDataRoot, dos_);
 
