@@ -2,6 +2,7 @@ package com.apelon.akcds.loinc;
 
 import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
 import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility;
+import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility.DescriptionType;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_ContentVersion.BaseContentVersion;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
@@ -301,6 +302,8 @@ public class LoincToEConcepts extends AbstractMojo
 
 			// Root
 			EConcept rootConcept = conceptUtility_.createConcept("LOINC");
+			conceptUtility_.addDescription(rootConcept, "LOINC", DescriptionType.SYNONYM, true, null, null, false);
+			conceptUtility_.addDescription(rootConcept, "Logical Observation Identifiers Names and Codes", DescriptionType.SYNONYM, false, null, null, false);
 
 			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getProperty("Source Version").getUUID(), false);
 			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getProperty("Release Date").getUUID(), false);
