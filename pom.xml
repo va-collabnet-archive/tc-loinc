@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.va.oia.terminology.converters</groupId>
 	<artifactId>loinc</artifactId>
-	<version>2.3-SNAPSHOT</version>
+	<version>2.3</version>
 	<name>loinc</name>
 	<packaging>pom</packaging>
 
