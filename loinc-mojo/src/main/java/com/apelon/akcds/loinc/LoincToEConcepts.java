@@ -3,7 +3,6 @@ package com.apelon.akcds.loinc;
 import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
 import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility;
 import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility.DescriptionType;
-import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_ContentVersion.BaseContentVersion;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.ValuePropertyPair;
@@ -91,7 +90,7 @@ public class LoincToEConcepts extends AbstractMojo
 	private final String loincNamespaceBaseSeed_ = "gov.va.med.term.loinc";
 
 	// Want a specific handle to this - adhoc usage.
-	private PropertyType contentVersion_;
+	private PT_ContentVersion contentVersion_;
 
 	// Need a handle to these too.
 	private PropertyType pt_SkipAxis_;
@@ -308,8 +307,8 @@ public class LoincToEConcepts extends AbstractMojo
 
 			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getProperty("Source Version").getUUID(), false);
 			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getProperty("Release Date").getUUID(), false);
-			conceptUtility_.addStringAnnotation(rootConcept, releaseVersion, BaseContentVersion.RELEASE.getProperty().getUUID(), false);
-			conceptUtility_.addStringAnnotation(rootConcept, loaderVersion, BaseContentVersion.LOADER_VERSION.getProperty().getUUID(), false);
+			conceptUtility_.addStringAnnotation(rootConcept, releaseVersion, contentVersion_.RELEASE.getUUID(), false);
+			conceptUtility_.addStringAnnotation(rootConcept, loaderVersion, contentVersion_.LOADER_VERSION.getUUID(), false);
 
 			concepts_.put(rootConcept.primordialUuid, rootConcept);
 
