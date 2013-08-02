@@ -476,7 +476,15 @@ public class LoincToEConcepts extends AbstractMojo
 
 				if (pt instanceof PT_Attributes)
 				{
-					conceptUtility_.addStringAnnotation(concept, fields[fieldIndex], p.getUUID(), p.isDisabled());
+					if ((p.getSourcePropertyNameFSN().equals("COMMON_TEST_RANK") || p.getSourcePropertyNameFSN().equals("COMMON_ORDER_RANK") 
+							|| p.getSourcePropertyNameFSN().equals("COMMON_SI_TEST_RANK")) && fields[fieldIndex].equals("0"))
+					{
+						continue;  //Skip attributes of these types when the value is 0
+					}
+					else
+					{
+						conceptUtility_.addStringAnnotation(concept, fields[fieldIndex], p.getUUID(), p.isDisabled());
+					}
 				}
 				else if (pt instanceof PT_Descriptions)
 				{
