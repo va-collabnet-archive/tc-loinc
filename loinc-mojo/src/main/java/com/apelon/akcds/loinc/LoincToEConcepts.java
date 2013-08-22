@@ -27,6 +27,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.dwfa.cement.ArchitectonicAuxiliary;
 import org.dwfa.tapi.TerminologyException;
 import org.ihtsdo.etypes.EConcept;
+import org.ihtsdo.tk.binding.snomed.SnomedMetadataRf2;
 import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
 import com.apelon.akcds.loinc.propertyTypes.PT_Attributes;
 import com.apelon.akcds.loinc.propertyTypes.PT_ContentVersion;
@@ -679,28 +680,25 @@ public class LoincToEConcepts extends AbstractMojo
 	{
 		if (status.equals("ACTIVE"))
 		{
-			return ArchitectonicAuxiliary.Concept.ACTIVE.getPrimoridalUid();
+			return SnomedMetadataRf2.ACTIVE_VALUE_RF2.getUuids()[0];
 		}
 		else if (status.equals("TRIAL"))
 		{
-			return ArchitectonicAuxiliary.Concept.TRIAL.getPrimoridalUid();
+			return SnomedMetadataRf2.PENDING_MOVE_RF2.getUuids()[0];
 		}
-
 		else if (status.equals("DISCOURAGED"))
 		{
-			return ArchitectonicAuxiliary.Concept.DISCOURAGED.getPrimoridalUid();
+			return SnomedMetadataRf2.CONCEPT_NON_CURRENT_RF2.getUuids()[0];
 		}
-
 		else if (status.equals("DEPRECATED"))
 		{
-			return ArchitectonicAuxiliary.Concept.DEPRECATED.getPrimoridalUid();
+			return SnomedMetadataRf2.OUTDATED_COMPONENT_RF2.getUuids()[0];
 		}
 		else
 		{
 			ConsoleUtil.printErrorln("No mapping for status: " + status);
 			return ArchitectonicAuxiliary.Concept.CURRENT.getPrimoridalUid();
 		}
-
 	}
 
 	private void checkForLeftoverPropertyTypes(String[] fileColumnNames) throws Exception
