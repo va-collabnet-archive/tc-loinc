@@ -482,6 +482,18 @@ public class LoincToEConcepts extends AbstractMojo
 					{
 						continue;  //Skip attributes of these types when the value is 0
 					}
+					else if (p.getSourcePropertyNameFSN().equals("RELATEDNAMES2") || p.getSourcePropertyNameFSN().equals("RELAT_NMS"))
+					{
+						String[] values = fields[fieldIndex].split(";");
+						for (String s : values)
+						{
+							s = s.trim();
+							if (s.length() > 0)
+							{
+								conceptUtility_.addStringAnnotation(concept, s, p.getUUID(), p.isDisabled());
+							}
+						}
+					}
 					else
 					{
 						conceptUtility_.addStringAnnotation(concept, fields[fieldIndex], p.getUUID(), p.isDisabled());
