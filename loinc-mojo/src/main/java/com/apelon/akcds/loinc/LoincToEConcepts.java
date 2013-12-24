@@ -8,20 +8,21 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.PropertyType;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.ValuePropertyPair;
 import gov.va.oia.terminology.converters.sharedUtils.stats.ConverterUUID;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.dwfa.cement.ArchitectonicAuxiliary;
@@ -99,19 +100,22 @@ public class LoincToEConcepts extends AbstractMojo
 	private PT_Refsets pt_refsets_;
 
 	private final ArrayList<PropertyType> propertyTypes_ = new ArrayList<PropertyType>();
+	
+	protected Hashtable<String, Integer> fieldMap_;
+	protected Hashtable<Integer, String> fieldMapInverse_;
+	
+	private HashMap<String, HashMap<String, String>> mapToData = new HashMap<>();
 
 	// Various caches for performance reasons
 	private Hashtable<String, PropertyType> propertyToPropertyType_ = new Hashtable<String, PropertyType>();
-
-	private int fieldCount_ = 0;
-	private Hashtable<String, Integer> fieldMap_ = new Hashtable<String, Integer>();
-	private Hashtable<Integer, String> fieldMapInverse_ = new Hashtable<Integer, String>();
 
 	private final SimpleDateFormat sdf_ = new SimpleDateFormat("yyyyMMdd");
 
 	Hashtable<UUID, EConcept> concepts_ = new Hashtable<UUID, EConcept>();
 
 	private NameMap classMapping_;
+	
+	private int skippedDeletedItems = 0;
 
 	/**
 	 * Used for debug. Sets up the same paths that maven would use.... allow the code to be run standalone.
@@ -119,8 +123,8 @@ public class LoincToEConcepts extends AbstractMojo
 	public static void main(String[] args) throws Exception
 	{
 		LoincToEConcepts loincConverter = new LoincToEConcepts();
-		loincConverter.outputDirectory = new File("../loinc-data/target/");
-		loincConverter.loincDataFiles = new File("../loinc-data/target/generated-resources/src");
+		loincConverter.outputDirectory = new File("../loinc-econcept/target/");
+		loincConverter.loincDataFiles = new File("../loinc-econcept/target/generated-resources/src");
 		loincConverter.execute();
 	}
 
@@ -155,8 +159,11 @@ public class LoincToEConcepts extends AbstractMojo
 	{
 		ConsoleUtil.println("LOINC Processing Begins " + new Date().toString());
 		
-		BufferedReader dataReader = null;
-		BufferedReader multiDataReader = null;
+		LOINCReader loincData = null;
+		LOINCReader mapTo = null;
+		LOINCReader sourceOrg = null;
+		LOINCReader loincMultiData = null;
+
 		try
 		{
 			// Set up the output
@@ -178,44 +185,43 @@ public class LoincToEConcepts extends AbstractMojo
 			pt_SkipAxis_ = new PT_SkipAxis();
 			pt_SkipClass_ = new PT_SkipClass();
 
-			File loincDataFile = null;
-			File loincMultiDataFile = null;
-
 			for (File f : loincDataFiles.listFiles())
 			{
 				if (f.getName().toLowerCase().equals("loincdb.txt"))
 				{
-					loincDataFile = f;
+					loincData = new TxtFileReader(f);
+				}
+				else if (f.getName().toLowerCase().equals("loinc.csv"))
+				{
+					loincData = new CSVFileReader(f);
+				}
+				else if (f.getName().toLowerCase().equals("map_to.csv"))
+				{
+					mapTo = new CSVFileReader(f);
+				}
+				else if (f.getName().toLowerCase().equals("source_organization.csv"))
+				{
+					sourceOrg = new CSVFileReader(f);
 				}
 				else if (f.getName().toLowerCase().endsWith("multi-axial_hierarchy.csv"))
 				{
-					loincMultiDataFile = f;
+					loincMultiData = new CSVFileReader(f);
 				}
 			}
 
-			if (loincDataFile == null)
+			if (loincData == null)
 			{
 				throw new MojoExecutionException("Could not find the loinc data file in " + loincDataFiles.getAbsolutePath());
 			}
-			else
-			{
-				ConsoleUtil.println("Using the data file " + loincDataFile.getAbsolutePath());
-			}
-			if (loincMultiDataFile == null)
+			if (loincMultiData == null)
 			{
 				throw new MojoExecutionException("Could not find the multi-axial file in " + loincDataFiles.getAbsolutePath());
 			}
-			else
-			{
-				ConsoleUtil.println("Using the multi-axial file " + loincMultiDataFile.getAbsolutePath());
-			}
-
-			dataReader = new BufferedReader(new FileReader(loincDataFile));
-			multiDataReader = new BufferedReader(new FileReader(loincMultiDataFile));
-
-			// Line 1 of the file is version, line 2 is date. Hope they are consistent.....
-			String version = dataReader.readLine();
-			String releaseDate = dataReader.readLine();
+			
+			String version = loincData.getVersion() ;
+			String releaseDate = loincData.getReleaseDate();
+			fieldMap_ = loincData.getFieldMap();
+			fieldMapInverse_ = loincData.getFieldMapInverse();
 
 			String mapFileName = null;
 
@@ -234,14 +240,41 @@ public class LoincToEConcepts extends AbstractMojo
 				PropertyType.setSourceVersion(3);
 				mapFileName = "classMappings-2.40.txt";
 			}
+			else if (version.contains("2.44"))
+			{
+				PropertyType.setSourceVersion(4);
+				mapFileName = "classMappings-2.44.txt";
+			}
 			else
 			{
 				ConsoleUtil.printErrorln("ERROR: UNTESTED VERSION - NO TESTED PROPERTY MAPPING EXISTS!");
-				PropertyType.setSourceVersion(3);
-				mapFileName = "classMappings-2.40.txt";
+				PropertyType.setSourceVersion(4);
+				mapFileName = "classMappings-2.44.txt";
 			}
 
 			classMapping_ = new NameMap(mapFileName);
+			
+			if (mapTo != null)
+			{
+				String[] line = mapTo.readLine();
+				while (line != null)
+				{
+					if (line.length > 0)
+					{
+						HashMap<String, String> nestedData = mapToData.get(line[0]);
+						if (nestedData == null)
+						{
+							nestedData = new HashMap<>();
+							mapToData.put(line[0], nestedData);
+						}
+						if (nestedData.put(line[1], line[2]) != null)
+						{
+							throw new Exception("Oops - " + line[0] + " " + line[1] + " " + line[2]);
+						}
+					}
+					line = mapTo.readLine();
+				}
+			}
 
 			initProperties();
 
@@ -266,29 +299,32 @@ public class LoincToEConcepts extends AbstractMojo
 					propertyToPropertyType_.put(propertyName, pt);
 				}
 			}
+			
+			if (sourceOrg != null)
+			{
+				EConcept sourceOrgConcept = conceptUtility_.createAndStoreMetaDataConcept("Source Organization", false, metaDataRoot, dos_);
+				String[] line = sourceOrg.readLine();
+				while (line != null)
+				{
+					//﻿"COPYRIGHT_ID","NAME","COPYRIGHT","TERMS_OF_USE","URL"
+					if (line.length > 0)
+					{
+						EConcept c = conceptUtility_.createConcept(line[0], sourceOrgConcept.getPrimordialUuid());
+						conceptUtility_.addDescription(c, line[1], DescriptionType.SYNONYM, true, propertyToPropertyType_.get("NAME").getProperty("NAME").getUUID(), null, false);
+						conceptUtility_.addStringAnnotation(c, line[2], propertyToPropertyType_.get("COPYRIGHT").getProperty("COPYRIGHT").getUUID(), false);
+						conceptUtility_.addStringAnnotation(c, line[3], propertyToPropertyType_.get("TERMS_OF_USE").getProperty("TERMS_OF_USE").getUUID(), false);
+						conceptUtility_.addStringAnnotation(c, line[4], propertyToPropertyType_.get("URL").getProperty("URL").getUUID(), false);
+						c.writeExternal(dos_);
+					}
+					line = sourceOrg.readLine();
+				}
+			}
 
 			// write this at the end
 			EConcept loincRefset = pt_refsets_.getConcept(PT_Refsets.Refsets.ALL.getProperty());
 
-			// Scan forward in the data file for the "cutoff" point
-			int i = 0;
-			while (true)
-			{
-				i++;
-				String temp = dataReader.readLine();
-				if (temp.equals("<----Clip Here for Data----->"))
-				{
-					break;
-				}
-				if (i > 500)
-				{
-					throw new Exception("Couldn't find '<----Clip Here for Data----->' constant.  Format must have changed.  Failing");
-				}
-			}
-
 			// The next line of the file is the header.
-			String headerLine = dataReader.readLine();
-			String[] headerFields = getFields(headerLine);
+			String[] headerFields = loincData.getHeader();
 
 			// validate that we are configured to map all properties properly
 			checkForLeftoverPropertyTypes(headerFields);
@@ -341,15 +377,15 @@ public class LoincToEConcepts extends AbstractMojo
 
 			int dataRows = 0;
 			{
-				String line = dataReader.readLine();
+				String[] line = loincData.readLine();
 				dataRows++;
 				while (line != null)
 				{
-					if (line.length() > 0)
+					if (line.length > 0)
 					{
 						processDataLine(line);
 					}
-					line = dataReader.readLine();
+					line = loincData.readLine();
 					dataRows++;
 					if (dataRows % 1000 == 0)
 					{
@@ -357,31 +393,30 @@ public class LoincToEConcepts extends AbstractMojo
 					}
 				}
 			}
-			dataReader.close();
+			loincData.close();
 
 			ConsoleUtil.println("Read " + dataRows + " data lines from file");
 
 			ConsoleUtil.println("Processing multi-axial file");
 
 			{
-				String line = multiDataReader.readLine();
-				// Line 1 is header - PATH_TO_ROOT,SEQUENCE,IMMEDIATE_PARENT,CODE,CODE_TEXT
+				// header - PATH_TO_ROOT,SEQUENCE,IMMEDIATE_PARENT,CODE,CODE_TEXT
 				int lineCount = 0;
-				line = multiDataReader.readLine();
+				String[] line = loincMultiData.readLine();
 				while (line != null)
 				{
 					lineCount++;
-					if (line.length() > 0)
+					if (line.length > 0)
 					{
 						processMultiAxialData(rootConcept.getPrimordialUuid(), line);
 					}
-					line = multiDataReader.readLine();
+					line = loincMultiData.readLine();
 					if (lineCount % 1000 == 0)
 					{
 						ConsoleUtil.showProgress();
 					}
 				}
-				multiDataReader.close();
+				loincMultiData.close();
 				ConsoleUtil.println("Read " + lineCount + " data lines from file");
 			}
 
@@ -414,6 +449,8 @@ public class LoincToEConcepts extends AbstractMojo
 				ConsoleUtil.println("  " + s);
 			}
 
+			ConsoleUtil.println("Skipped " + skippedDeletedItems + " Loinc codes because they were flagged as DELETED and they had no desriptions.");
+			
 			// this could be removed from final release. Just added to help debug editor problems.
 			ConsoleUtil.println("Dumping UUID Debug File");
 			ConverterUUID.dump(new File(outputDirectory, "loincUuidDebugMap.txt"));
@@ -432,8 +469,16 @@ public class LoincToEConcepts extends AbstractMojo
 				{
 					dos_.flush();
 					dos_.close();
-					dataReader.close();
-					multiDataReader.close();
+					loincData.close();
+					loincMultiData.close();
+					if (mapTo != null)
+					{
+						mapTo.close();
+					}
+					if (sourceOrg != null)
+					{
+						sourceOrg.close();
+					}
 				}
 				catch (IOException e)
 				{
@@ -443,17 +488,15 @@ public class LoincToEConcepts extends AbstractMojo
 		}
 	}
 
-	private void processDataLine(String line) throws ParseException, IOException, TerminologyException
+	private void processDataLine(String[] fields) throws ParseException, IOException, TerminologyException
 	{
-		String[] fields = getFields(line);
-
 		Integer index = fieldMap_.get("DT_LAST_CH");
 		if (index == null)
 		{
 			index = fieldMap_.get("DATE_LAST_CHANGED");  // They changed this in 2.38 release
 		}
 		String lastChanged = fields[index];
-		long time = (lastChanged == null ? conceptUtility_.defaultTime_ : sdf_.parse(lastChanged).getTime());
+		long time = (StringUtils.isBlank(lastChanged) ? conceptUtility_.defaultTime_ : sdf_.parse(lastChanged).getTime());
 
 		UUID statusUUID = mapStatus(fields[fieldMap_.get("STATUS")]);
 
@@ -566,11 +609,36 @@ public class LoincToEConcepts extends AbstractMojo
 			}
 		}
 		
+		//MAP_TO moved to a different file in 2.42.
+		HashMap<String, String> mappings = mapToData.get(code);
+		if (mappings != null)
+		{
+			for (Entry<String, String> mapping : mappings.entrySet())
+			{
+				String target = mapping.getKey();
+				String comment = mapping.getValue();
+				TkRelationship r = conceptUtility_.addRelationship(concept, buildUUID(target), propertyToPropertyType_.get("MAP_TO").getProperty("MAP_TO"), null);
+				if (comment != null && comment.length() > 0)
+				{
+					conceptUtility_.addStringAnnotation(r, comment, propertyToPropertyType_.get("COMMENT").getProperty("COMMENT").getUUID(), false);
+				}
+			}
+		}
+		
 		//Now add all the descriptions
 		if (descriptions.size() == 0)
 		{
-			ConsoleUtil.printErrorln("no name for " + code);
-			conceptUtility_.addFullySpecifiedName(concept, code);
+			if ("DEL".equals(fields[fieldMap_.get("CHNG_TYPE")]))
+			{
+				//They put a bunch of these in 2.44... leaving out most of the important info... just makes a mess.  Don't load them.
+				skippedDeletedItems++;
+				return;
+			}
+			else
+			{
+				ConsoleUtil.printErrorln("ERROR: no name for " + code);
+				conceptUtility_.addFullySpecifiedName(concept, code);
+			}
 		}
 		else
 		{
@@ -584,37 +652,24 @@ public class LoincToEConcepts extends AbstractMojo
 		}
 	}
 
-	private void processMultiAxialData(UUID rootConcept, String line)
+	private void processMultiAxialData(UUID rootConcept, String[] line)
 	{
 		// PATH_TO_ROOT,SEQUENCE,IMMEDIATE_PARENT,CODE,CODE_TEXT
-		// But, the format sucks. Code_Text is surrounded by "..." and full of commas.... so it needs custom parsing.
+		// This file format used to be a disaster... but it looks like since 2.40, they encode proper CSV, so I've thrown out the custom parsing.
+		// If you need the old custom parser that reads the crap they used to produce as 'CSV', look at the SVN history for this method. 
 
-		int startPos = 0;
-		int endPos = line.indexOf(',');
-		String pathString = line.substring(startPos, endPos);
+		String pathString = line[0];
 		String[] pathToRoot = (pathString.length() > 0 ? pathString.split("\\.") : new String[] {});
 
-		startPos = endPos + 1;
-		endPos = line.indexOf(",", startPos);
-		String sequence = line.substring(startPos, endPos);
-
-		startPos = endPos + 1;
-		endPos = line.indexOf(",", startPos);
-		String immediateParentString = line.substring(startPos, endPos);
+		String sequence = line[1];
+		
+		String immediateParentString = line[2];
 
 		UUID immediateParent = (immediateParentString == null || immediateParentString.length() == 0 ? rootConcept : buildUUID(immediateParentString));
 
-		startPos = endPos + 1;
-		endPos = line.indexOf(",", startPos);
-		String code = line.substring(startPos, endPos);
+		String code = line[3];
 
-		startPos = endPos + 1;
-		endPos = line.indexOf(",", startPos);
-		String codeText = line.substring(startPos);
-		if (codeText.startsWith("\"") && codeText.endsWith("\""))
-		{
-			codeText = codeText.substring(1, codeText.length() - 1);
-		}
+		String codeText = line[4];
 
 		if (code.length() == 0 || codeText.length() == 0)
 		{
@@ -733,38 +788,5 @@ public class LoincToEConcepts extends AbstractMojo
 		return ConverterUUID.createNamespaceUUIDFromString(uniqueIdentifier, true);
 	}
 
-	private String[] getFields(String line)
-	{
-		String[] temp = line.split("\\t");
-		for (int i = 0; i < temp.length; i++)
-		{
-			if (temp[i].length() == 0)
-			{
-				temp[i] = null;
-			}
-			else if (temp[i].startsWith("\"") && temp[i].endsWith("\""))
-			{
-				temp[i] = temp[i].substring(1, temp[i].length() - 1);
-			}
-		}
-		if (fieldCount_ == 0)
-		{
-			fieldCount_ = temp.length;
-			int i = 0;
-			for (String s : temp)
-			{
-				fieldMapInverse_.put(i, s);
-				fieldMap_.put(s, i++);
-			}
-		}
-		else if (temp.length < fieldCount_)
-		{
-			temp = Arrays.copyOf(temp, fieldCount_);
-		}
-		else if (temp.length > fieldCount_)
-		{
-			throw new RuntimeException("Data error - to many fields found on line: " + line);
-		}
-		return temp;
-	}
+	
 }

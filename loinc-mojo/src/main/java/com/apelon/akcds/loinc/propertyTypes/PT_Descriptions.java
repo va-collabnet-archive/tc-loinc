@@ -24,5 +24,8 @@ public class PT_Descriptions extends BPT_Descriptions
 		
 		//from multiaxial
 		addProperty("CODE_TEXT", FSN);
+		
+		//From Source_Organization
+		addProperty("NAME");
 	}
 }
