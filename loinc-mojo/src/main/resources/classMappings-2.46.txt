@@ -1,4 +1,4 @@
-#This information was captured from the PDF manual which came with the 2.44 release.  Its a pain to parse out of the PDF.  Hopefully, future releases 
+#This information was captured from the PDF manual which came with the 2.46 release.  Its a pain to parse out of the PDF.  Hopefully, future releases 
 #will include this information in an easily computable form.
 #
 # Clinical Term Classes
@@ -41,6 +41,8 @@ CARD.RISK
 Cardiac Risk Scales Framingham
 CARD.US
 Cardiac ultrasound (was US.ECHO)
+CARDIO-PULM
+Cardiopulmonary
 CLIN
 Clinical NEC (not elsewhere classified)
 DENTAL
@@ -155,6 +157,8 @@ PANEL.BP
 Blood pressure order set
 PANEL.CARDIAC
 Cardiac studies order set
+PANEL.CLIN
+Clinical NEC (not elsewhere classified) set
 PANEL.CV
 Cardiovascular order set
 PANEL.DEVICES
@@ -215,6 +219,8 @@ RESP.TIMED.MOLEC
 Respiratory timed molecular
 SKNFLD.MOLEC
 Skinfold measurements molecular
+TRAUMA
+Trauma
 TRNSPLNT.ORGAN
 Organ transplant
 TUMRRGT
@@ -256,6 +262,8 @@ FERT
 Fertility
 HEM/BC
 Hematology (coagulation) differential count
+H&P.HX.LAB
+History for laboratory studies
 HL7.CYTOGEN
 Clinical cytogenetic report
 HL7.GENETICS
@@ -383,6 +391,8 @@ ATTACH.MODIFIER
 Modifier attachment
 ATTACH.OBS
 Obstetrics attachment
+ATTACH.PERIODONTAL
+Periodontal attachment
 ATTACH.REHAB
 Rehabilitation attachment
 ATTACH.REHAB.ABUSE
@@ -412,6 +422,8 @@ Respiratory attachment
 #
 PANEL.SURVEY.AAOS
 American Academy of Orthopaedic Surgeons
+PANEL.SURVEY.AHRQ
+Agency for Healthcare Research and Quality (AHRQ) survey set
 PANEL.SURVEY.BIMS
 Brief Interview for Mental Health Status (BIMS) set
 PANEL.SURVEY.CAM
@@ -470,7 +482,7 @@ PANEL.SURVEY.QRDA
 Quality Health Reporting Document Architecture set
 PANEL.SURVEY.RFC
 Residual Functional Capacity set
-PANEL.SURVEY.SAMSHA
+PANEL.SURVEY.SAMHSA
 Substance Abuse and Mental Health Services Administration (SAMHSA) set
 PANEL.SURVEY.USSGFHT
 United States Surgeon General Family Health Tool (USSGFHT) set
@@ -478,6 +490,8 @@ PANEL.TIMP
 Test of Infant Motor Performance (TIMP) set
 SURVEY.AAOS
 American Academy of Orthopaedic Surgeons (AAOS) survey
+SURVEY.AHRQ
+Agency for Healthcare Research and Quality (AHRQ) survey
 SURVEY.CARE
 Continuity Assessment Record and Evaluation (CARE) survey
 SURVEY.CDC
@@ -502,6 +516,8 @@ SURVEY.MDS
 Minimum Data Set (MDS) for Nursing Home Resident Assessment and Care Screening survey
 SURVEY.MFS
 Morse Fall Scale (MFS) survey
+SURVEY.MISC
+Miscellaneous survey
 SURVEY.MTLHLTH
 Mental Health survey
 SURVEY.NEURO
@@ -534,7 +550,7 @@ SURVEY.QRDA
 Quality Health Reporting Document Architecture (QRDA) survey
 SURVEY.RFC
 Residual Functional Capacity (RFC) survey
-SURVEY.SAMSHA
+SURVEY.SAMHSA
 Substance Abuse and Mental Health Services Administration (SAMHSA) survey
 SURVEY.USSGFHT
 United States Surgeon General Family Health Tool (USSGFHT) survey

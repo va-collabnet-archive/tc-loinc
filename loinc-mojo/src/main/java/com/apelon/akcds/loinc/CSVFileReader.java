@@ -30,7 +30,15 @@ public class CSVFileReader extends LOINCReader
 	
 	private void readReleaseNotes(File dataFolder) throws IOException
 	{
-		File relNotes = new File(dataFolder, "loinc_releasenotes.txt");
+		File relNotes  = null;
+		for (File f : dataFolder.listFiles())
+		{
+			if (f.getName().toLowerCase().equals("loinc_releasenotes.txt"))
+			{
+				relNotes = f;
+				break;
+			}
+		}
 		if (relNotes.exists())
 		{
 			BufferedReader br = new BufferedReader(new FileReader(relNotes));
@@ -54,6 +62,10 @@ public class CSVFileReader extends LOINCReader
 				line = br.readLine();
 			}
 			br.close();
+		}
+		else
+		{
+			ConsoleUtil.printErrorln("Couldn't find release notes file - can't read version or release date!");
 		}
 	}
 	

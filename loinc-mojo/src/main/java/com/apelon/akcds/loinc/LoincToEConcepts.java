@@ -245,6 +245,11 @@ public class LoincToEConcepts extends AbstractMojo
 				PropertyType.setSourceVersion(4);
 				mapFileName = "classMappings-2.44.txt";
 			}
+			else if (version.contains("2.46"))
+			{
+				PropertyType.setSourceVersion(4);
+				mapFileName = "classMappings-2.46.txt";
+			}
 			else
 			{
 				ConsoleUtil.printErrorln("ERROR: UNTESTED VERSION - NO TESTED PROPERTY MAPPING EXISTS!");
