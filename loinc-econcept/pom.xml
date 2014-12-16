@@ -1,43 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>gov.va.oia.terminology.converters</groupId>
-		<artifactId>loinc</artifactId>
-		<version>2.9</version>
-	</parent>
 
+	<groupId>gov.va.oia.terminology.converters</groupId>
 	<artifactId>loinc-econcept</artifactId>
+	<!-- this should be set to ${sourceData.version}-loader-${loader.version} but that doesn't appease the maven gods that know best.... -->
+	<version>2.48-loader-3.0-SNAPSHOT</version>
+	
 	<packaging>pom</packaging>
-	<name>loinc-econcept</name>
-	<!-- this should be set to ${sourceData.version}-loader-${project.parent.version} but that doesn't appease the maven gods that know best.... -->
-	<version>2.48-loader-2.9</version>
-
+	<name>Loinc eConcept Artifact Generator</name>
+	
 	<properties>
 		<sourceData.version>2.48</sourceData.version>
+		<loader.version>3.0-SNAPSHOT</loader.version>
+		<!-- For no classifier, leave this blank-->
+		<resultArtifactClassifier></resultArtifactClassifier>
 	</properties>
+	
+	<scm>
+		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/va-oia-terminology-converters/loinc/trunk/loinc-econcept/</connection>
+		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/va-oia-terminology-converters/loinc/trunk/loinc-econcept/</developerConnection>
+		<url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/loinc/trunk/loinc-econcept/?root=va-oia-terminology-converters&amp;system=exsy1002</url>
+	</scm>
+	
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>Copyright Notice
+				This is a work of the U.S. Government and is not subject to copyright
+				protection in the United States. Foreign copyrights may apply.
+			</comments>
+		</license>
+	</licenses>
+	
+	<organization>
+		<name>U.S. Department of Veterans Affairs</name>
+		<url>www.va.gov</url>
+	</organization>
+
+	<dependencies>
+		<dependency>
+			<groupId>gov.va.oia.terminology.converters</groupId>
+			<artifactId>loinc-mojo</artifactId>
+			<version>${loader.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-data</id>
-						<configuration>
-							<descriptors>
-								<descriptor>resources/assembly/generated-artifact.xml</descriptor>
-							</descriptors>
-						</configuration>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<phase>package</phase>
-					</execution>
-				</executions>
-			</plugin>
-
 			<!-- Get source files from archiva -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -67,7 +80,7 @@
 			<plugin>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>loinc-mojo</artifactId>
-				<version>${project.parent.version}</version>
+				<version>${loader.version}</version>
 				<executions>
 					<execution>
 						<id>generate-jbin</id>
@@ -76,7 +89,76 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<loincDataFiles>${project.build.directory}/generated-resources/src</loincDataFiles>
+							<inputFileLocation>${project.build.directory}/generated-resources/src</inputFileLocation>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>attach-result</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/assembly/assembly.xml</descriptor>
+							</descriptors>
+							<attach>false</attach>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+					<execution>
+						<id>attach-debug</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/assembly/debug.xml</descriptor>
+							</descriptors>
+							<attach>false</attach>
+							<encoding>UTF-8</encoding>
+							<skipAssembly>${skipUUIDDebug}</skipAssembly>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>attach-artifact</id>
+						<goals>
+							<goal>attach-artifact</goal>
+						</goals>
+						<configuration>
+							<failIfNoMatch>false</failIfNoMatch>
+							<artifacts>
+								<artifact>
+									<type>jbin.zip</type>
+									<!-- Note that the assembly plugin doesn't use the same classifier - we hack the classifier it returns to be a mis
+										mash of classifier and part of type.  So there is always a classifier on the produced zip file, even if no classifier
+										was specified by the user.  During artifact attachment, this classifier/type mess is corrected. -->
+									<file>${project.build.directory}/${project.build.finalName}-.jbin.zip</file>
+									<classifier>${resultArtifactClassifier}</classifier>
+								</artifact>
+								<artifact>
+									<type>debug.zip</type>
+									<file>${project.build.directory}/${project.build.finalName}-.debug.zip</file>
+									<classifier>${resultArtifactClassifier}</classifier>
+								</artifact>
+							</artifacts>
 						</configuration>
 					</execution>
 				</executions>

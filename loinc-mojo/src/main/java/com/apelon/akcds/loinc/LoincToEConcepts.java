@@ -1,6 +1,7 @@
 package com.apelon.akcds.loinc;
 
 import gov.va.oia.terminology.converters.sharedUtils.ConsoleUtil;
+import gov.va.oia.terminology.converters.sharedUtils.ConverterBaseMojo;
 import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility;
 import gov.va.oia.terminology.converters.sharedUtils.EConceptUtility.DescriptionType;
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.Property;
@@ -21,10 +22,12 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.dwfa.cement.ArchitectonicAuxiliary;
 import org.dwfa.tapi.TerminologyException;
 import org.ihtsdo.etypes.EConcept;
@@ -46,49 +49,10 @@ import com.apelon.akcds.loinc.propertyTypes.PT_SkipOther;
  * 
  * Paths are typically controlled by maven, however, the main() method has paths configured so that they
  * match what maven does for test purposes.
- * 
- * @goal convert-loinc-to-jbin
- * 
- * @phase process-sources
  */
-public class LoincToEConcepts extends AbstractMojo
+@Mojo( name = "convert-loinc-to-jbin", defaultPhase = LifecyclePhase.PROCESS_SOURCES )
+public class LoincToEConcepts extends ConverterBaseMojo
 {
-	/**
-	 * Location of the file.
-	 * 
-	 * @parameter expression="${project.build.directory}"
-	 * @required
-	 */
-	private File outputDirectory;
-
-	/**
-	 * Location of the Loinc data.
-	 * 
-	 * @parameter
-	 * @required
-	 */
-	private File loincDataFiles;
-
-	/**
-	 * Loader version number
-	 * Use parent because project.version pulls in the version of the data file, which I don't want.
-	 * 
-	 * @parameter expression="${project.parent.version}"
-	 * @required
-	 */
-	private String loaderVersion;
-
-	/**
-	 * Content version number
-	 * 
-	 * @parameter expression="${project.version}"
-	 * @required
-	 */
-	private String releaseVersion;
-
-	private DataOutputStream dos_;
-	private EConceptUtility conceptUtility_;
-
 	private final String loincNamespaceBaseSeed_ = "gov.va.med.term.loinc";
 
 	// Want a specific handle to this - adhoc usage.
@@ -124,7 +88,7 @@ public class LoincToEConcepts extends AbstractMojo
 	{
 		LoincToEConcepts loincConverter = new LoincToEConcepts();
 		loincConverter.outputDirectory = new File("../loinc-econcept/target/");
-		loincConverter.loincDataFiles = new File("../loinc-econcept/target/generated-resources/src");
+		loincConverter.inputFileLocation = new File("../loinc-econcept/target/generated-resources/src");
 		loincConverter.execute();
 	}
 
@@ -166,26 +130,15 @@ public class LoincToEConcepts extends AbstractMojo
 
 		try
 		{
-			// Set up the output
-			if (!outputDirectory.exists())
-			{
-				outputDirectory.mkdirs();
-			}
+			super.execute();
 
-			if (!loincDataFiles.isDirectory())
+			if (!inputFileLocation.isDirectory())
 			{
 				throw new MojoExecutionException("LoincDataFiles must point to a directory containing the 3 required loinc data files");
 			}
 			
-			File binaryOutputFile = new File(outputDirectory, "loincEConcepts.jbin");
-			dos_ = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(binaryOutputFile)));
-			conceptUtility_ = new EConceptUtility(loincNamespaceBaseSeed_, "LOINC Path", dos_);
-			
-			contentVersion_ = new PT_ContentVersion();
-			pt_SkipAxis_ = new PT_SkipAxis();
-			pt_SkipClass_ = new PT_SkipClass();
 
-			for (File f : loincDataFiles.listFiles())
+			for (File f : inputFileLocation.listFiles())
 			{
 				if (f.getName().toLowerCase().equals("loincdb.txt"))
 				{
@@ -211,15 +164,26 @@ public class LoincToEConcepts extends AbstractMojo
 
 			if (loincData == null)
 			{
-				throw new MojoExecutionException("Could not find the loinc data file in " + loincDataFiles.getAbsolutePath());
+				throw new MojoExecutionException("Could not find the loinc data file in " + inputFileLocation.getAbsolutePath());
 			}
 			if (loincMultiData == null)
 			{
-				throw new MojoExecutionException("Could not find the multi-axial file in " + loincDataFiles.getAbsolutePath());
+				throw new MojoExecutionException("Could not find the multi-axial file in " + inputFileLocation.getAbsolutePath());
 			}
 			
+			SimpleDateFormat dateReader = new SimpleDateFormat("MMMMMMMMMMMMM yyyy"); //Parse things like "June 2014"
+			Date releaseDate = dateReader.parse(loincData.getReleaseDate());
+			
+			File binaryOutputFile = new File(outputDirectory, "loincEConcepts.jbin");
+			dos_ = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(binaryOutputFile)));
+			conceptUtility_ = new EConceptUtility(loincNamespaceBaseSeed_, "LOINC Path", dos_, releaseDate.getTime());
+			
+			contentVersion_ = new PT_ContentVersion();
+			pt_SkipAxis_ = new PT_SkipAxis();
+			pt_SkipClass_ = new PT_SkipClass();
+			
 			String version = loincData.getVersion() ;
-			String releaseDate = loincData.getReleaseDate();
+			//String releaseDate = ;
 			fieldMap_ = loincData.getFieldMap();
 			fieldMapInverse_ = loincData.getFieldMapInverse();
 
@@ -353,8 +317,8 @@ public class LoincToEConcepts extends AbstractMojo
 			ConsoleUtil.println("Root concept FSN is 'LOINC' and the UUID is " + rootConcept.getPrimordialUuid());
 
 			conceptUtility_.addStringAnnotation(rootConcept, version, contentVersion_.getProperty("Source Version").getUUID(), false);
-			conceptUtility_.addStringAnnotation(rootConcept, releaseDate, contentVersion_.getProperty("Release Date").getUUID(), false);
-			conceptUtility_.addStringAnnotation(rootConcept, releaseVersion, contentVersion_.RELEASE.getUUID(), false);
+			conceptUtility_.addStringAnnotation(rootConcept, loincData.getReleaseDate(), contentVersion_.getProperty("Release Date").getUUID(), false);
+			conceptUtility_.addStringAnnotation(rootConcept, converterResultVersion, contentVersion_.RELEASE.getUUID(), false);
 			conceptUtility_.addStringAnnotation(rootConcept, loaderVersion, contentVersion_.LOADER_VERSION.getUUID(), false);
 
 			concepts_.put(rootConcept.primordialUuid, rootConcept);
@@ -538,13 +502,18 @@ public class LoincToEConcepts extends AbstractMojo
 					else if (p.getSourcePropertyNameFSN().equals("RELATEDNAMES2") || p.getSourcePropertyNameFSN().equals("RELAT_NMS"))
 					{
 						String[] values = fields[fieldIndex].split(";");
+						TreeSet<String> uniqueValues = new TreeSet<>();
 						for (String s : values)
 						{
 							s = s.trim();
 							if (s.length() > 0)
 							{
-								conceptUtility_.addStringAnnotation(concept, s, p.getUUID(), p.isDisabled());
+								uniqueValues.add(s);
 							}
+						}
+						for (String s : uniqueValues)
+						{
+							conceptUtility_.addStringAnnotation(concept, s, p.getUUID(), p.isDisabled());
 						}
 					}
 					else
@@ -797,6 +766,4 @@ public class LoincToEConcepts extends AbstractMojo
 	{
 		return ConverterUUID.createNamespaceUUIDFromString(uniqueIdentifier, true);
 	}
-
-	
 }

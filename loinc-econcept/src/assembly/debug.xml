@@ -1,4 +1,5 @@
 <assembly>
+	<id>.debug</id>
 	<formats>
 		<format>zip</format>
 	</formats>
@@ -6,16 +7,9 @@
 		<fileSet>
 			<directory>${project.build.directory}</directory>
 			<includes>
-				<include>*.jbin</include>
+				<include>*DebugMap.txt</include>
 			</includes>
 			<outputDirectory>/</outputDirectory>
-		</fileSet>
-		<fileSet>
-			<directory>${project.build.directory}</directory>
-			<includes>
-				<include>ConsoleOutput.txt</include>
-			</includes>
-			<outputDirectory>/Stats_and_Debug/</outputDirectory>
 		</fileSet>
 	</fileSets>
 	<includeBaseDirectory>false</includeBaseDirectory>
