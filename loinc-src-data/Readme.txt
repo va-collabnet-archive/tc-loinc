@@ -7,16 +7,16 @@ Steps to deploy new source content:
 		
 Note - new source content should not be checked into SVN.  When finished, simply empty the native-source folder.
 
-For LOINC - the loader currently expects two files (no longer preferred)
-	1) - LOINCDB.TXT
-	2) - LOINC_V240_MULTI_AXIAL_HIERARCHY.CSV
-
-Or, since Loader 2.7, we can also use the new csv distribution (which is preferred).  We require 5 files, in this case:
+For LOINC since Loader 2.7, we expect the csv distribution.  We require 5 files, in this case:
 	1) loinc.csv
 	2) map_to.csv
 	3) source_organization.csv
 	4) LOINC_V244_MULTI-AXIAL_HIERARCHY.CSV
 	5) loinc_releasenotes.txt
+	
+For older versions of LOINC that predate the CSV distribution, the loader currently expects two files 
+	1) - LOINCDB.TXT
+	2) - LOINC_V240_MULTI_AXIAL_HIERARCHY.CSV
 
 
 Each of these files should exist in the root of the native-source folder.

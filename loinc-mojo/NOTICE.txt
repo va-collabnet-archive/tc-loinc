@@ -1,4 +1,4 @@
-Loinc Converter Mojo
+LOINC Converter Mojo
 
 Copyright Notice
 This is a work of the U.S. Government and is not subject to copyright
@@ -16,5 +16,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+==========================================================================
+
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
+
+==========================================================================
+
+This produce includes software developed by the International Health 
+Terminology Standards Development Organisation (http://www.ihtsdo.org/)

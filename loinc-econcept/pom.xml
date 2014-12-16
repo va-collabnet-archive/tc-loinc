@@ -9,7 +9,7 @@
 	<version>2.48-loader-3.0-SNAPSHOT</version>
 	
 	<packaging>pom</packaging>
-	<name>Loinc eConcept Artifact Generator</name>
+	<name>LOINC eConcept Artifact Generator</name>
 	
 	<properties>
 		<sourceData.version>2.48</sourceData.version>
@@ -33,6 +33,11 @@
 				This is a work of the U.S. Government and is not subject to copyright
 				protection in the United States. Foreign copyrights may apply.
 			</comments>
+		</license>
+		<license>
+			<name>LOINC License</name>
+			<url>https://loinc.org/terms-of-use</url>
+			<comments>The LOINC content packaged by this module is governed by the LOINC license</comments>
 		</license>
 	</licenses>
 	

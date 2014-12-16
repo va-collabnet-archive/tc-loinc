@@ -33,23 +33,23 @@
 			<filtered>false</filtered>
 		</file>
 		<file>
-			<source>${basedir}/src/assembly/LICENSE.txt</source>
+			<source>${basedir}/LICENSE.txt</source>
 			<outputDirectory>META-INF/</outputDirectory>
 			<filtered>false</filtered>
 		</file>
 		<file>
-			<source>${basedir}/src/assembly/LICENSE.txt</source>
-			<outputDirectory>META-INF/maven/${groupId}/${artifactId}/src/assembly/</outputDirectory>
+			<source>${basedir}/LICENSE.txt</source>
+			<outputDirectory>META-INF/maven/${groupId}/${artifactId}/</outputDirectory>
 			<filtered>false</filtered>
 		</file>
 		<file>
-			<source>${basedir}/src/assembly/NOTICE.txt</source>
+			<source>${basedir}/NOTICE.txt</source>
 			<outputDirectory>META-INF/</outputDirectory>
 			<filtered>false</filtered>
 		</file>
 		<file>
-			<source>${basedir}/src/assembly/NOTICE.txt</source>
-			<outputDirectory>META-INF/maven/${groupId}/${artifactId}/src/assembly/</outputDirectory>
+			<source>${basedir}/NOTICE.txt</source>
+			<outputDirectory>META-INF/maven/${groupId}/${artifactId}/</outputDirectory>
 			<filtered>false</filtered>
 		</file>
 		<file>
