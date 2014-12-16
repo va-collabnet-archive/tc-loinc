@@ -64,9 +64,9 @@ public class NameMap
 			if (value != null)
 			{
 				String old = map_.put(key.toLowerCase(), value);
-				if (old != null)
+				if (old != null && !old.equals(value))
 				{
-					ConsoleUtil.printErrorln("Map file " + mapFileName + " has dupliate definition for " + key);
+					ConsoleUtil.printErrorln("Map file " + mapFileName + " has duplicate definition for " + key + ", but with different values!");
 				}
 				key = null;
 				value = null;
