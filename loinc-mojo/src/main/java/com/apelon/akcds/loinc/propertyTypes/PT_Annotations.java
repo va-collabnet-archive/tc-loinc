@@ -18,17 +18,19 @@
  */
 package com.apelon.akcds.loinc.propertyTypes;
 
-import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Attributes;
+import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Annotations;
+import java.util.List;
 
 /**
  * Fields to treat as attributes
  * @author Daniel Armbrust
  */
-public class PT_Attributes extends BPT_Attributes
+public class PT_Annotations extends BPT_Annotations
 {
-	public PT_Attributes()
+	public PT_Annotations(List<String> skipList)
 	{
 		super();
+		super.skipList = skipList;
 		
 		addProperty("DT_LAST_CH", 0, 1);  //replaced with DATE_LAST_CHANGED in 2.38
 		addProperty("DATE_LAST_CHANGED", 2, 0);

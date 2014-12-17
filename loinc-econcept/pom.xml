@@ -94,7 +94,12 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
+							<!-- See ConverterBaseMojo.java and LoincToEConcepts.java for configuration options -->
 							<inputFileLocation>${project.build.directory}/generated-resources/src</inputFileLocation>
+							<!--Just an example -->
+							<!--annotationSkipList>
+								<annotationSkipList>SPECIES</annotationSkipList>
+							</annotationSkipList-->
 						</configuration>
 					</execution>
 				</executions>

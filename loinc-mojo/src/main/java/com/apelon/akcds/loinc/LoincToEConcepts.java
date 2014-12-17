@@ -51,7 +51,7 @@ import org.dwfa.tapi.TerminologyException;
 import org.ihtsdo.etypes.EConcept;
 import org.ihtsdo.tk.binding.snomed.SnomedMetadataRf2;
 import org.ihtsdo.tk.dto.concept.component.relationship.TkRelationship;
-import com.apelon.akcds.loinc.propertyTypes.PT_Attributes;
+import com.apelon.akcds.loinc.propertyTypes.PT_Annotations;
 import com.apelon.akcds.loinc.propertyTypes.PT_ContentVersion;
 import com.apelon.akcds.loinc.propertyTypes.PT_Descriptions;
 import com.apelon.akcds.loinc.propertyTypes.PT_IDs;
@@ -109,12 +109,18 @@ public class LoincToEConcepts extends ConverterBaseMojo
 		loincConverter.inputFileLocation = new File("../loinc-econcept/target/generated-resources/src");
 		loincConverter.execute();
 	}
+	
+	@Override
+	protected boolean supportsAnnotationSkipList()
+	{
+		return true;
+	}
 
 	private void initProperties()
 	{
 		// Can't init these till we know the data version
 		propertyTypes_.add(new PT_IDs());
-		propertyTypes_.add(new PT_Attributes());
+		propertyTypes_.add(new PT_Annotations(annotationSkipList));
 		propertyTypes_.add(new PT_Descriptions());
 		propertyTypes_.add(pt_SkipAxis_);
 		propertyTypes_.add(pt_SkipClass_);
@@ -129,7 +135,7 @@ public class LoincToEConcepts extends ConverterBaseMojo
 			r.addProperty("Has_" + s);
 		}
 		propertyTypes_.add(r);
-		propertyTypes_.add(new PT_SkipOther());
+		propertyTypes_.add(new PT_SkipOther(annotationSkipList));
 
 		propertyTypes_.add(contentVersion_);
 		
@@ -510,7 +516,7 @@ public class LoincToEConcepts extends ConverterBaseMojo
 
 				Property p = pt.getProperty(fieldMapInverse_.get(fieldIndex));
 
-				if (pt instanceof PT_Attributes)
+				if (pt instanceof PT_Annotations)
 				{
 					if ((p.getSourcePropertyNameFSN().equals("COMMON_TEST_RANK") || p.getSourcePropertyNameFSN().equals("COMMON_ORDER_RANK") 
 							|| p.getSourcePropertyNameFSN().equals("COMMON_SI_TEST_RANK")) && fields[fieldIndex].equals("0"))
@@ -597,7 +603,7 @@ public class LoincToEConcepts extends ConverterBaseMojo
 				}
 				else if (pt instanceof PT_SkipOther)
 				{
-					// noop
+					conceptUtility_.getLoadStats().addSkippedProperty();
 				}
 				else
 				{

@@ -19,6 +19,7 @@
 package com.apelon.akcds.loinc.propertyTypes;
 
 import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
+import java.util.List;
 
 
 /**
@@ -28,9 +29,12 @@ import gov.va.oia.terminology.converters.sharedUtils.propertyTypes.BPT_Skip;
  */
 public class PT_SkipOther extends BPT_Skip
 {
-	public PT_SkipOther()
+	@SafeVarargs
+	public PT_SkipOther(List<String> ... skipLists)
 	{
 		super("Skip Other");
+		
+		addSkipListEntries(skipLists);
 		
 		//Not Loaded
 		addProperty("SOURCE");
