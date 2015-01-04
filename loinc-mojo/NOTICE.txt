@@ -23,5 +23,5 @@ The Apache Software Foundation (http://www.apache.org/).
 
 ==========================================================================
 
-This produce includes software developed by the International Health 
+This product includes software developed by the International Health 
 Terminology Standards Development Organisation (http://www.ihtsdo.org/)
