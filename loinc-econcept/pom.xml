@@ -88,7 +88,7 @@
 				<version>${loader.version}</version>
 				<executions>
 					<execution>
-						<id>generate-jbin</id>
+						<id>generate-loinc-jbin</id>
 						<goals>
 							<goal>convert-loinc-to-jbin</goal>
 						</goals>
